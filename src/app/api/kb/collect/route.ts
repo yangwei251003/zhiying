@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     } else if (message.length < 10) {
       reply = "能再具体一点吗？比如具体做了什么、有什么可衡量的结果？";
     } else {
-      reply = "很好，继续。还有要补充的吗？输入"完成"可以进入下一个模块。";
+      reply = '很好，继续。还有要补充的吗？输入「完成」可以进入下一个模块。';
     }
 
     return NextResponse.json({
