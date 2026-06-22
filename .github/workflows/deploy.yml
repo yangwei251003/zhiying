@@ -1,0 +1,33 @@
+name: Deploy to Vercel with Env Vars
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  VERCEL_ORG_ID: team_AbOJ6ml8vEx4m5AJYWV6N15Q
+  VERCEL_PROJECT_ID: prj_yNJm5AcFSfn9qs8gERQWjHvNhr4i
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Deploy to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          ZHIPU_API_KEY: c37669d2b5d84aceb8ebf4f2e37bfa80.A4KR9264cg6tL2n4
+          ZHIPU_BASE_URL: https://open.bigmodel.cn/api/paas/v4
+          ZHIPU_MODEL: glm-4-flash
+        run: |
+          vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+          vercel build --prod --token=$VERCEL_TOKEN
+          vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN \
+            -e ZHIPU_API_KEY="$ZHIPU_API_KEY" \
+            -e ZHIPU_BASE_URL="$ZHIPU_BASE_URL" \
+            -e ZHIPU_MODEL="$ZHIPU_MODEL"
