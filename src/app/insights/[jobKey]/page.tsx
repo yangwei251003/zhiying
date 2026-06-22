@@ -13,6 +13,7 @@ import {
   HelpCircle,
   ThumbsDown,
   Lightbulb,
+  Pin,
 } from "lucide-react";
 
 const insightsData: Record<string, any> = {
@@ -83,7 +84,7 @@ export default function InsightsPage() {
               <ul className="space-y-2">
                 {data.real_work.map((item: string) => (
                   <li key={item} className="flex items-start gap-2 text-sm text-neutral-700">
-                    <span className="text-primary-500 mt-0.5 flex-shrink-0">📌</span>
+                    <Pin className="h-4 w-4 text-primary-500 mt-0.5 flex-shrink-0" />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -149,7 +150,7 @@ export default function InsightsPage() {
               <ul className="space-y-2">
                 {data.onboarding_tips.map((item: string) => (
                   <li key={item} className="flex items-start gap-2 text-sm text-neutral-700">
-                    <span className="text-accent-500 mt-0.5 flex-shrink-0">💡</span>
+                    <Lightbulb className="h-4 w-4 text-accent-500 mt-0.5 flex-shrink-0" />
                     <span>{item}</span>
                   </li>
                 ))}

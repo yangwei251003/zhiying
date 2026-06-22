@@ -1,52 +1,44 @@
 "use client";
 
 import { motion } from "framer-motion";
-import {
-  Database,
-  UserCircle,
-  GitCompare,
-  FileDown,
-  BookOpen,
-  Compass,
-  BarChart3,
-  Shield,
-} from "lucide-react";
+import { BarChart3, Shield } from "lucide-react";
+import { FeatureIcon } from "@/components/motion/feature-icon";
 
 const modules = [
   {
     title: "知识库搭建",
     desc: "9 模块结构化收集 · 多份管理",
-    icon: Database,
+    featureIcon: "knowledge" as const,
     category: "core",
   },
   {
     title: "个人画像",
     desc: "深度剖析能力 · 核心竞争力",
-    icon: UserCircle,
+    featureIcon: "match" as const,
     category: "core",
   },
   {
     title: "岗位匹配分析",
     desc: "三分组精准 · 9 维度岗位评价",
-    icon: GitCompare,
+    featureIcon: "match" as const,
     category: "core",
   },
   {
     title: "简历生成",
     desc: "每句可追溯 · Word/PDF 导出",
-    icon: FileDown,
+    featureIcon: "resume" as const,
     category: "core",
   },
   {
     title: "学习路径",
     desc: "待补强速成 · 7 天+30 天计划",
-    icon: BookOpen,
+    featureIcon: "interview" as const,
     category: "aux",
   },
   {
     title: "岗位推荐",
     desc: "反向推荐方向 · 适合度说明",
-    icon: Compass,
+    featureIcon: "jd" as const,
     category: "aux",
   },
   {
@@ -68,7 +60,7 @@ export function ModuleOverviewSection() {
     <section id="features" className="py-16 md:py-20 bg-white">
       <div className="container-page mx-auto px-4 md:px-8">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 1, y: 0 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-center mb-12"
@@ -83,27 +75,33 @@ export function ModuleOverviewSection() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {modules.map((m, i) => (
-            <motion.div
-              key={m.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.06 }}
-              whileHover={{ y: -4 }}
-              className={`relative rounded-xl border bg-white p-5 transition-all duration-200 hover:shadow-md ${
-                m.category === "core"
-                  ? "border-primary-200 border-t-4 border-t-primary-500"
-                  : "border-accent-200 border-t-4 border-t-accent-500"
-              }`}
-            >
-              <div
-                className={`w-12 h-12 rounded-lg flex items-center justify-center mb-3 ${
+              <motion.div
+                key={m.title}
+                initial={{ opacity: 1, y: 0 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.06 }}
+                whileHover={{ y: -4 }}
+                className={`relative rounded-xl border bg-white p-5 transition-all duration-200 hover:shadow-md ${
                   m.category === "core"
-                    ? "bg-primary-50 text-primary-600"
-                    : "bg-accent-50 text-accent-600"
+                    ? "border-primary-200 border-t-4 border-t-primary-500"
+                    : "border-accent-200 border-t-4 border-t-accent-500"
                 }`}
               >
-                <m.icon className="h-6 w-6" />
+              <div className="mb-3">
+                {m.featureIcon ? (
+                  <FeatureIcon name={m.featureIcon} size={52} />
+                ) : (
+                  <div
+                    className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                      m.category === "core"
+                        ? "bg-primary-50 text-primary-600"
+                        : "bg-accent-50 text-accent-600"
+                    }`}
+                  >
+                    <m.icon className="h-6 w-6" />
+                  </div>
+                )}
               </div>
               <h3 className="font-semibold text-sm mb-1 text-neutral-900">{m.title}</h3>
               <p className="text-xs text-neutral-500 leading-relaxed">{m.desc}</p>

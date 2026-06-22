@@ -20,6 +20,7 @@ import {
   ArrowLeft,
   Upload,
 } from "lucide-react";
+import { XiaojingAvatar } from "@/components/motion/xiaojing-avatar";
 import {
   KB_MODULE_NAMES,
   KB_MODULE_LABELS,
@@ -68,7 +69,7 @@ export default function CollectPage() {
     setMessages([
       {
         role: "ai",
-        content: `你好！我是职映小镜 🤖\n\n我会一步步引导你建立完整的职业知识库。每个模块大约 1-2 分钟，全做完通常 8-15 分钟。\n\n${MODULE_GUIDE_QUESTIONS[moduleName]}`,
+        content: `你好！我是职映小镜\n\n我会一步步引导你建立完整的职业知识库。每个模块大约 1-2 分钟，全做完通常 8-15 分钟。\n\n${MODULE_GUIDE_QUESTIONS[moduleName]}`,
         timestamp: Date.now(),
       },
     ]);
@@ -290,13 +291,13 @@ export default function CollectPage() {
                 {/* 头像 */}
                 <div
                   className={cn(
-                    "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm",
+                    "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm overflow-hidden",
                     msg.role === "ai"
                       ? "bg-gradient-to-br from-primary-500 to-accent-500 text-white"
                       : "bg-neutral-200 text-neutral-700"
                   )}
                 >
-                  {msg.role === "ai" ? "🤖" : "我"}
+                  {msg.role === "ai" ? <XiaojingAvatar size={32} /> : "我"}
                 </div>
 
                 {/* 气泡 */}
@@ -334,8 +335,8 @@ export default function CollectPage() {
               animate={{ opacity: 1 }}
               className="flex gap-3 max-w-2xl"
             >
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-sm">
-                🤖
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-sm overflow-hidden">
+                <XiaojingAvatar size={32} expression="thinking" />
               </div>
               <div className="rounded-xl px-4 py-3 bg-white border border-neutral-200">
                 <div className="flex gap-1.5">

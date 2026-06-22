@@ -18,6 +18,7 @@ import {
   BookOpen,
   Loader2,
 } from "lucide-react";
+import { XiaojingThinkingMascot } from "@/components/motion/xiaojing-mascot";
 
 const mockResult = {
   job_title: "电力系统工程师",
@@ -98,8 +99,8 @@ export default function MatchResultPage() {
   if (loading || !result) {
     return (
       <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center gap-4">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center animate-pulse">
-          <span className="text-3xl">🤖</span>
+        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center animate-pulse">
+          <XiaojingThinkingMascot size={72} />
         </div>
         <div className="text-center">
           <p className="text-sm font-medium text-neutral-700">职映小镜正在分析中...</p>

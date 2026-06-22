@@ -19,6 +19,12 @@ import {
   CheckCircle2,
   ArrowLeft,
   Sparkles,
+  User,
+  GraduationCap,
+  Briefcase,
+  FolderOpen,
+  Wrench,
+  Star,
 } from "lucide-react";
 
 const resumeContent = {
@@ -140,12 +146,12 @@ export default function ResumePreviewPage() {
               <>
                 {/* 模块列表 */}
                 {[
-                  { label: "个人信息", icon: "👤", expanded: true },
-                  { label: "教育背景", icon: "🎓", expanded: false },
-                  { label: "实习经历", icon: "💼", expanded: false },
-                  { label: "项目经历", icon: "📁", expanded: false },
-                  { label: "技能清单", icon: "🔧", expanded: false },
-                  { label: "自我评价", icon: "⭐", expanded: false },
+                  { label: "个人信息", icon: User, expanded: true },
+                  { label: "教育背景", icon: GraduationCap, expanded: false },
+                  { label: "实习经历", icon: Briefcase, expanded: false },
+                  { label: "项目经历", icon: FolderOpen, expanded: false },
+                  { label: "技能清单", icon: Wrench, expanded: false },
+                  { label: "自我评价", icon: Star, expanded: false },
                 ].map((m) => (
                   <details
                     key={m.label}
@@ -153,7 +159,7 @@ export default function ResumePreviewPage() {
                     className="group rounded-lg border border-neutral-200 overflow-hidden"
                   >
                     <summary className="flex items-center gap-2 p-3 cursor-pointer hover:bg-neutral-50 text-sm font-medium text-neutral-700 list-none">
-                      <span>{m.icon}</span>
+                      <m.icon className="h-4 w-4 text-neutral-500" />
                       <span className="flex-1">{m.label}</span>
                       <svg className="w-4 h-4 text-neutral-400 group-open:rotate-90 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M9 18l6-6-6-6" />

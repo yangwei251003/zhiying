@@ -6,8 +6,9 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/sonner";
-import { ArrowLeft, Zap, RefreshCw } from "lucide-react";
+import { ArrowLeft, RefreshCw } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
+import { XiaojingAvatar } from "@/components/motion/xiaojing-avatar";
 
 function VerifyContent() {
   const router = useRouter();
@@ -67,8 +68,8 @@ function VerifyContent() {
 
         <div className="bg-white rounded-2xl shadow-lg border border-neutral-200 p-8 space-y-6">
           <div className="flex flex-col items-center gap-2">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
-              <Zap className="h-6 w-6 text-white" />
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center overflow-hidden">
+              <XiaojingAvatar size={48} />
             </div>
             <h1 className="text-2xl font-bold text-neutral-900">输入验证码</h1>
             <p className="text-sm text-neutral-500">

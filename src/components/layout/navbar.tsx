@@ -11,7 +11,10 @@ import {
   SheetTrigger,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Menu, Zap } from "lucide-react";
+import { Menu, LogOut, User } from "lucide-react";
+import { Logo } from "@/components/motion/logo";
+import { useAuth } from "@/components/providers/auth-provider";
+import { XiaojingAvatar } from "@/components/motion/xiaojing-avatar";
 
 const navLinks = [
   { href: "/", label: "首页" },
@@ -22,6 +25,7 @@ const navLinks = [
 export function Navbar() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
+  const { user, signOut, isDemoMode } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -40,15 +44,7 @@ export function Navbar() {
     >
       <div className="container-page mx-auto flex h-16 items-center justify-between px-4 md:px-8">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <Zap className="h-7 w-7 text-primary-500" />
-          <span className="text-lg font-semibold text-neutral-900">
-            职映
-          </span>
-          <span className="hidden sm:inline-block text-sm text-primary-600 font-medium">
-            ZhiYing
-          </span>
-        </Link>
+        <Logo className="h-8" />
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-6">
@@ -71,12 +67,33 @@ export function Navbar() {
 
         {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-3">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/login">登录</Link>
-          </Button>
-          <Button size="sm" asChild>
-            <Link href="/start">免费开始</Link>
-          </Button>
+          {user ? (
+            <>
+              {isDemoMode && (
+                <span className="text-[10px] bg-accent-50 text-accent-600 px-2 py-0.5 rounded-full font-medium">
+                  Demo
+                </span>
+              )}
+              <Link href="/dashboard" className="flex items-center gap-2 text-sm text-neutral-700 hover:text-primary-600">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center overflow-hidden">
+                  <XiaojingAvatar size={28} />
+                </div>
+                <span>{user.email?.split("@")[0] || "用户"}</span>
+              </Link>
+              <Button variant="ghost" size="sm" onClick={signOut}>
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/login">登录</Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link href="/start">免费开始</Link>
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu */}
@@ -89,7 +106,22 @@ export function Navbar() {
           </SheetTrigger>
           <SheetContent side="right" className="w-72">
             <SheetTitle className="sr-only">导航菜单</SheetTitle>
-            <div className="flex flex-col gap-4 mt-8">
+            {user && (
+              <div className="flex items-center gap-3 px-1 py-3 border-b border-neutral-100 mb-2">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center overflow-hidden">
+                  <XiaojingAvatar size={36} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-neutral-900 truncate">
+                    {user.email?.split("@")[0] || "用户"}
+                  </p>
+                  {isDemoMode && (
+                    <span className="text-[10px] text-accent-600">Demo 模式</span>
+                  )}
+                </div>
+              </div>
+            )}
+            <div className="flex flex-col gap-4 mt-4">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -103,12 +135,29 @@ export function Navbar() {
                 </Link>
               ))}
               <div className="flex flex-col gap-2 pt-4 border-t border-neutral-200">
-                <Button variant="outline" size="default" asChild className="w-full">
-                  <Link href="/login">登录</Link>
-                </Button>
-                <Button size="default" asChild className="w-full">
-                  <Link href="/start">免费开始</Link>
-                </Button>
+                {user ? (
+                  <>
+                    <Button variant="outline" size="default" asChild className="w-full">
+                      <Link href="/dashboard">
+                        <User className="mr-2 h-4 w-4" />
+                        我的仪表盘
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" size="default" className="w-full" onClick={signOut}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      退出登录
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="outline" size="default" asChild className="w-full">
+                      <Link href="/login">登录</Link>
+                    </Button>
+                    <Button size="default" asChild className="w-full">
+                      <Link href="/start">免费开始</Link>
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </SheetContent>

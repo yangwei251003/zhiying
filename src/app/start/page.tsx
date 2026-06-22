@@ -3,15 +3,15 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { FeatureIcon } from "@/components/motion/feature-icon";
+import { XiaojingWaveMascot } from "@/components/motion/xiaojing-mascot";
+import { DataParticles } from "@/components/motion/data-particles";
 import {
-  FileUp,
-  Sparkles,
-  MessageCircle,
   ArrowRight,
   Check,
+  Sparkles,
 } from "lucide-react";
 
 export default function StartPage() {
@@ -21,7 +21,7 @@ export default function StartPage() {
     {
       title: "导入旧简历",
       desc: "已有 docx/pdf 简历？上传后自动提取，只追问缺失部分",
-      icon: FileUp,
+      featureIcon: "resume" as const,
       badge: "快速",
       onClick: () => router.push("/start/import"),
       variant: "secondary" as const,
@@ -29,7 +29,7 @@ export default function StartPage() {
     {
       title: "新建知识库",
       desc: "从零开始，按 9 模块结构化深度收集（推荐）",
-      icon: Sparkles,
+      featureIcon: "knowledge" as const,
       badge: "推荐",
       onClick: () => router.push("/kb/new/collect"),
       variant: "primary" as const,
@@ -38,7 +38,7 @@ export default function StartPage() {
     {
       title: "对话式补全",
       desc: "已有部分经历？像聊天一样补全缺失信息",
-      icon: MessageCircle,
+      featureIcon: "interview" as const,
       badge: "灵活",
       onClick: () => router.push("/kb/new/collect?mode=chat"),
       variant: "secondary" as const,
@@ -46,13 +46,18 @@ export default function StartPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-primary-50">
-      <div className="container-page mx-auto px-4 md:px-8 py-12 md:py-20">
+    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-primary-50 relative overflow-hidden">
+      <DataParticles className="absolute inset-0 opacity-25" count={20} />
+
+      <div className="container-page mx-auto px-4 md:px-8 py-12 md:py-20 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-3xl mx-auto text-center mb-12"
+          className="max-w-3xl mx-auto text-center mb-10"
         >
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white shadow-md border border-primary-100 mb-5">
+            <XiaojingWaveMascot size={72} />
+          </div>
           <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-3">
             开始建立你的职业知识库
           </h1>
@@ -82,15 +87,7 @@ export default function StartPage() {
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between mb-2">
-                    <div
-                      className={`w-11 h-11 rounded-lg flex items-center justify-center ${
-                        opt.featured
-                          ? "bg-primary-500 text-white"
-                          : "bg-primary-50 text-primary-600"
-                      }`}
-                    >
-                      <opt.icon className="h-5 w-5" />
-                    </div>
+                    <FeatureIcon name={opt.featureIcon} size={64} />
                     <Badge variant={opt.featured ? "primary" : "neutral"}>
                       {opt.badge}
                     </Badge>

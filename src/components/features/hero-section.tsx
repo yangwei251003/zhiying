@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { XiaojingWaveMascot } from "@/components/motion/xiaojing-mascot";
+import { DataParticles } from "@/components/motion/data-particles";
 
 export function HeroSection() {
   return (
@@ -65,7 +67,7 @@ export function HeroSection() {
             </div>
           </motion.div>
 
-          {/* Right: IP Character Placeholder */}
+          {/* Right: 动画 IP 形象 */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
@@ -73,14 +75,10 @@ export function HeroSection() {
             className="relative flex justify-center lg:justify-end"
           >
             <div className="relative w-full max-w-md aspect-square">
-              {/* IP 形象 */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-64 h-64 md:w-80 md:h-80 rounded-3xl bg-white/80 backdrop-blur-sm shadow-lg border border-primary-100 flex items-center justify-center overflow-hidden p-6 animate-float">
-                  <img
-                    src="/assets/ip/mascot.png"
-                    alt="职映小镜 - AI职业顾问"
-                    className="max-w-full max-h-full object-contain"
-                  />
+                <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-3xl bg-white/80 backdrop-blur-sm shadow-lg border border-primary-100 flex items-center justify-center overflow-hidden p-6">
+                  <DataParticles className="absolute inset-0 opacity-40" count={18} />
+                  <XiaojingWaveMascot size={220} />
                 </div>
                 {/* 装饰光斑 */}
                 <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full bg-accent-400/10 blur-xl" />

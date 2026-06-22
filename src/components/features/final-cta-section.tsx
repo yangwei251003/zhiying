@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { XiaojingWaveMascot } from "@/components/motion/xiaojing-mascot";
 
 export function FinalCtaSection() {
   return (
@@ -15,9 +16,9 @@ export function FinalCtaSection() {
           viewport={{ once: true }}
           className="max-w-2xl mx-auto"
         >
-          {/* IP 占位 */}
-          <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-white shadow-md mb-6 animate-float">
-            <span className="text-4xl">🤖</span>
+          {/* IP 动画形象 */}
+          <div className="inline-flex items-center justify-center w-28 h-28 rounded-full bg-white shadow-md mb-6">
+            <XiaojingWaveMascot size={100} />
           </div>
 
           <h2 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-3">
