@@ -43,7 +43,7 @@ export function DataParticles({ className, count = 20, color = "mixed" }: DataPa
   }, [count, color, mounted]);
 
   if (!mounted) {
-    return <div className={cn("pointer-events-none overflow-hidden", className)} />;
+    return null;
   }
 
   return (
