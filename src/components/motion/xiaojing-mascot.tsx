@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
+// 导出 XiaojingState 以供外部组件（如 HeroSection）引用，并兼容 "welcome" 状态
+export type XiaojingState = "idle" | "listening" | "speaking" | "thinking" | "celebrating" | "error" | "welcome";
+
 interface XiaojingMascotProps {
-  state?: "idle" | "listening" | "speaking" | "thinking" | "celebrating" | "error";
+  state?: XiaojingState;
   pose?: "idle" | "holding-resume" | "holding-tablet" | "waving" | "404";
   expression?: "smile" | "happy" | "confused" | "thinking" | "surprised";
   size?: number;
@@ -25,39 +28,30 @@ export function XiaojingMascot({
 }: XiaojingMascotProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   
+  // 标志组件是否已挂载（Hydration 安全防护）
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // 随机眨眼逻辑
   const [blink, setBlink] = useState(false);
   useEffect(() => {
-    if (!animate) return;
+    if (!animate || !mounted) return;
     const interval = setInterval(() => {
       setBlink(true);
       setTimeout(() => setBlink(false), 180);
     }, 4000);
     return () => clearInterval(interval);
-  }, [animate]);
+  }, [animate, mounted]);
 
   // 点击彩蛋状态："none" | "dizzy" (眩晕) | "shy" (害羞) | "salute" (敬礼)
   const [clickState, setClickState] = useState<"none" | "dizzy" | "shy" | "salute">("none");
 
-  // 视差跟随 Motion Values
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  const springConfig = { stiffness: 120, damping: 14 };
-  const headX = useSpring(mouseX, springConfig);
-  const headY = useSpring(mouseY, springConfig);
-
-  // 不同层级的视差系数，创造 3D 景深感
-  const hairX = useTransform(headX, (x) => x * 0.4);
-  const hairY = useTransform(headY, (y) => y * 0.4);
-  const eyeX = useTransform(headX, (x) => x * 0.85);
-  const eyeY = useTransform(headY, (y) => y * 0.85);
-  const visorX = useTransform(headX, (x) => x * 0.65);
-  const visorY = useTransform(headY, (y) => y * 0.65);
-  const faceX = useTransform(headX, (x) => x * 0.55);
-  const faceY = useTransform(headY, (y) => y * 0.55);
-
+  // 客户端视差跟随逻辑
+  const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
   useEffect(() => {
+    if (!mounted) return;
     const handleMouseMove = (e: MouseEvent) => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
@@ -66,12 +60,14 @@ export function XiaojingMascot({
       const dx = (e.clientX - centerX) / (window.innerWidth / 2);
       const dy = (e.clientY - centerY) / (window.innerHeight / 2);
       // 限制偏转在 -8px 到 8px 内
-      mouseX.set(Math.max(-1, Math.min(1, dx)) * 8);
-      mouseY.set(Math.max(-1, Math.min(1, dy)) * 6);
+      setMouseOffset({
+        x: Math.max(-1, Math.min(1, dx)) * 8,
+        y: Math.max(-1, Math.min(1, dy)) * 6
+      });
     };
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [mouseX, mouseY]);
+  }, [mounted]);
 
   // 点击头发触发晕眩
   const handleHairClick = (e: React.MouseEvent) => {
@@ -102,7 +98,7 @@ export function XiaojingMascot({
     ? "dizzy"
     : clickState === "shy"
       ? "happy" 
-      : state === "celebrating"
+      : state === "celebrating" || state === "welcome"
         ? "happy"
         : expression;
 
@@ -158,6 +154,10 @@ export function XiaojingMascot({
     }
   };
 
+  // 视差偏转系数定义（只在挂载后视差生效，防 SSR Mismatch）
+  const dx = mounted ? mouseOffset.x : 0;
+  const dy = mounted ? mouseOffset.y : 0;
+
   return (
     <div 
       ref={containerRef}
@@ -184,8 +184,8 @@ export function XiaojingMascot({
       <motion.svg
         viewBox="0 0 176 200"
         className="w-full h-full overflow-visible"
-        initial={animate ? { opacity: 0, y: 10 } : false}
-        animate={animate ? (state === "celebrating" || clickState === "dizzy" ? "bounce" : state === "error" ? "shake" : "float") : false}
+        initial={animate && mounted ? { opacity: 0, y: 10 } : false}
+        animate={animate && mounted ? (state === "celebrating" || clickState === "dizzy" ? "bounce" : state === "error" ? "shake" : "float") : false}
         variants={bodyVariants}
       >
         <defs>
@@ -241,8 +241,8 @@ export function XiaojingMascot({
           />
         )}
 
-        {/* 全息扫描投影 (Listening/Scanning 状态下投射) */}
-        {(state === "listening" || state === "thinking") && (
+        {/* 全息扫描投影 (Listening/Scanning/Welcome 状态下投射) */}
+        {(state === "listening" || state === "thinking" || state === "welcome") && (
           <motion.polygon
             points="52,86 124,86 160,200 16,200"
             fill="url(#hologramGradient)"
@@ -297,8 +297,10 @@ export function XiaojingMascot({
         </g>
 
         {/* 头部视差容器 (头发、头盔、眼罩、面部和眼睛随光标平移动画) */}
-        <motion.g style={{ x: faceX, y: faceY }}>
-          
+        <motion.g 
+          animate={{ x: dx * 0.55, y: dy * 0.55 }}
+          transition={{ type: "spring", stiffness: 100, damping: 15 }}
+        >
           {/* 耳罩/耳机 */}
           <circle cx="44" cy="74" r="11" fill="url(#suitBlue)" stroke="#FFFFFF" strokeWidth="1.5" />
           <circle cx="44" cy="74" r="7" fill="#FFFFFF" opacity="0.3" />
@@ -318,8 +320,13 @@ export function XiaojingMascot({
             className="cursor-pointer"
           />
 
-          {/* 帅气的蓝色渐变浪花发束 (带眩晕彩蛋触发) */}
-          <motion.g style={{ x: hairX, y: hairY }} onClick={handleHairClick} className="cursor-pointer">
+          {/* 帅气的蓝色渐变浪花发束 (带眩晕彩蛋触发) - 支持微小独立平移体现立体错落感 */}
+          <motion.g 
+            animate={{ x: dx * -0.15, y: dy * -0.15 }}
+            transition={{ type: "spring", stiffness: 100, damping: 15 }}
+            onClick={handleHairClick} 
+            className="cursor-pointer"
+          >
             {/* 浪花发片底 */}
             <path
               d="M 50 50 C 54 34 72 26 88 26 C 104 26 122 34 126 50 C 118 42 104 38 88 38 C 72 38 58 42 50 50 Z"
@@ -334,8 +341,8 @@ export function XiaojingMascot({
           </motion.g>
 
           {/* 脸部红润小腮红 */}
-          <ellipse cx="58" cy="80" rx="6" ry="4" fill="#F87171" opacity={clickState === "shy" ? 0.6 : 0.15} />
-          <ellipse cx="118" cy="80" rx="6" ry="4" fill="#F87171" opacity={clickState === "shy" ? 0.6 : 0.15} />
+          <ellipse cx="58" cy="80" rx="6" ry="4" fill="#F87171" opacity={clickState === "shy" ? 0.65 : 0.15} />
+          <ellipse cx="118" cy="80" rx="6" ry="4" fill="#F87171" opacity={clickState === "shy" ? 0.65 : 0.15} />
 
           {/* 亮蓝色半透明全息眼罩 (Visor) */}
           <motion.path
@@ -343,11 +350,15 @@ export function XiaojingMascot({
             fill="url(#visorGlass)"
             stroke="#93C5FD"
             strokeWidth="1.5"
-            style={{ x: visorX, y: visorY }}
+            animate={{ x: dx * 0.1, y: dy * 0.1 }}
+            transition={{ type: "spring", stiffness: 100, damping: 15 }}
           />
 
           {/* 眼部状态机 (双重高光大眼睛) */}
-          <motion.g style={{ x: eyeX, y: eyeY }}>
+          <motion.g 
+            animate={{ x: dx * 0.3, y: dy * 0.3 }}
+            transition={{ type: "spring", stiffness: 100, damping: 15 }}
+          >
             {clickState === "dizzy" ? (
               // 1. 眩晕状态 (X X 眼)
               <>
@@ -366,14 +377,14 @@ export function XiaojingMascot({
                 <path d="M 60 72 Q 68 76 76 72" fill="none" stroke="#1D4ED8" strokeWidth="3" strokeLinecap="round" />
                 <path d="M 100 72 Q 108 76 116 72" fill="none" stroke="#1D4ED8" strokeWidth="3" strokeLinecap="round" />
               </>
-            ) : activeExpression === "happy" || state === "celebrating" ? (
-              // 3. 开心/庆祝/害羞眯眼笑 (> < 弯月牙眼)
+            ) : activeExpression === "happy" || state === "celebrating" || state === "welcome" ? (
+              // 3. 开心/庆祝/害羞/欢迎眯眼笑 (> < 弯月牙眼)
               <>
                 <path d="M 60 74 Q 68 64 76 74" fill="none" stroke="#10B981" strokeWidth="3.5" strokeLinecap="round" />
                 <path d="M 100 74 Q 108 64 116 74" fill="none" stroke="#10B981" strokeWidth="3.5" strokeLinecap="round" />
               </>
-            ) : state === "listening" || activeExpression === "surprised" ? (
-              // 4. 专注/扫描眼 (微缩蔚蓝雷达同心圆 ⊙ ⊙)
+            ) : state === "listening" || state === "welcome" || activeExpression === "surprised" ? (
+              // 4. 专注/扫描眼/欢迎 (微缩蔚蓝雷达同心圆 ⊙ ⊙)
               <>
                 <circle cx="68" cy="70" r="7" fill="none" stroke="#00F2FE" strokeWidth="2" />
                 <circle cx="68" cy="70" r="2.5" fill="#00F2FE" />
@@ -472,7 +483,7 @@ export function XiaojingMascot({
           <>
             <circle cx="50" cy="158" r="6.5" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1" />
             <motion.g
-              animate={animate ? { rotate: [0, -16, 0, -16, 0] } : {}}
+              animate={animate && mounted ? { rotate: [0, -16, 0, -16, 0] } : {}}
               transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
               style={{ transformOrigin: "126px 146px" }}
             >
@@ -495,7 +506,7 @@ export function XiaojingMascot({
         )}
 
         {/* 专注全息浮空控制台 (Listening/Scanning 状态下浮现) */}
-        {(state === "listening" || state === "thinking") && (
+        {(state === "listening" || state === "thinking" || state === "welcome") && (
           <motion.g
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 0.85, y: 0 }}
@@ -510,7 +521,7 @@ export function XiaojingMascot({
             <circle cx="76" cy="161" r="1.5" fill="#00f2fe" />
             <rect x="83" y="160" width="8" height="2" fill="#00f2fe" />
             <rect x="95" y="158" width="12" height="6" rx="1.5" fill="none" stroke="#00f2fe" strokeWidth="0.8" />
-            {/* 全息向上飘动的浮点粒子 */}
+            {/* 全息制造飘动的浮点粒子 */}
             <motion.circle cx="64" cy="148" r="1" fill="#00f2fe" animate={{ y: [0, -10], opacity: [1, 0] }} transition={{ repeat: Infinity, duration: 1.5 }} />
             <motion.circle cx="108" cy="150" r="1" fill="#00f2fe" animate={{ y: [0, -12], opacity: [1, 0] }} transition={{ repeat: Infinity, duration: 1.8, delay: 0.4 }} />
           </motion.g>
