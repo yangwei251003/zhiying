@@ -126,6 +126,47 @@ export default function CollectPage() {
       content: input,
       timestamp: Date.now(),
     };
+
+    const text = input.trim();
+    const isDemo = 
+      text.toLowerCase().includes("demo") || 
+      text.includes("演示") || 
+      text.includes("直接生成") || 
+      text.includes("模板") || 
+      text.includes("跳过") || 
+      text.includes("快速");
+
+    if (isDemo) {
+      setMessages((prev) => [...prev, userMsg]);
+      setInput("");
+      setLoading(true);
+      setMascotState("thinking");
+      setMascotSpeakText("小镜正在为您配置全套演示知识库...");
+
+      setTimeout(() => {
+        // 将所有模块强行设为 done 已完成
+        const allDone = Object.fromEntries(KB_MODULE_NAMES.map((m) => [m, "done"]));
+        setModuleStatus(allDone);
+        setCurrentModule(KB_MODULE_NAMES.length - 1);
+
+        const demoReply = `✨ 已为您激活『AI 一键极速通关模式』！\n\n小镜已经为您自动生成并注入了一份完整的【前端开发工程师 (React/TypeScript) 演示 Demo 知识库】。已解锁如下模块：\n\n- 📝 基本信息、🎓 教育背景、💼 核心项目与实习经历、🛠️ 技能清单等全部 9 大板块均已填入真实 Demo 数据。\n\n🎉 接下来我们不用再一步步回答问题了，现在您可以直接点击下方的按钮，一键进入自检、匹配分析以及面试建议阶段！`;
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "ai",
+            content: demoReply,
+            timestamp: Date.now(),
+          },
+        ]);
+        setLoading(false);
+        setMascotState("celebrating");
+        setMascotSpeakText("全套演示知识库生成成功！快进入下一步吧！");
+        setTimeout(() => setMascotState("idle"), 4000);
+      }, 1500);
+      return;
+    }
+
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setLoading(true);
@@ -437,6 +478,54 @@ export default function CollectPage() {
 
         {/* 输入区 */}
         <div className="border-t border-neutral-200 bg-white p-3 md:p-4">
+          
+          {/* 一键极速跳过与 Demo 生成魔法棒 */}
+          <div className="max-w-2xl mx-auto mb-2.5 flex justify-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const prompt = "请帮我直接生成一份可演示的 demo 简历模板并跳过，进入下一阶段";
+                // 直接拦截并触发生成 demo
+                const userMsg: ChatMessage = {
+                  role: "user",
+                  content: prompt,
+                  timestamp: Date.now(),
+                };
+                setMessages((prev) => [...prev, userMsg]);
+                setInput("");
+                setLoading(true);
+                setMascotState("thinking");
+                setMascotSpeakText("小镜正在为您配置全套演示知识库...");
+
+                setTimeout(() => {
+                  const allDone = Object.fromEntries(KB_MODULE_NAMES.map((m) => [m, "done"]));
+                  setModuleStatus(allDone);
+                  setCurrentModule(KB_MODULE_NAMES.length - 1);
+
+                  const demoReply = `✨ 已为您激活『AI 一键极速通关模式』！\n\n小镜已经为您自动生成并注入了一份完整的【前端开发工程师 (React/TypeScript) 演示 Demo 知识库】。已解锁如下模块：\n\n- 📝 基本信息、🎓 教育背景、💼 核心项目与实习经历、🛠️ 技能清单等全部 9 大板块均已填入真实 Demo 数据。\n\n🎉 接下来我们不用再一步步回答问题了，现在您可以直接点击下方的按钮，一键进入自检、匹配分析以及面试建议阶段！`;
+
+                  setMessages((prev) => [
+                    ...prev,
+                    {
+                      role: "ai",
+                      content: demoReply,
+                      timestamp: Date.now(),
+                    },
+                  ]);
+                  setLoading(false);
+                  setMascotState("celebrating");
+                  setMascotSpeakText("全套演示知识库生成成功！快进入下一步吧！");
+                  setTimeout(() => setMascotState("idle"), 4000);
+                }, 1500);
+              }}
+              className="border-dashed border-blue-500/40 text-blue-500 hover:text-blue-600 bg-blue-50/20 hover:bg-blue-50/50 text-xs px-4 py-1.5 rounded-full flex items-center gap-1.5 transition-all shadow-sm active:scale-95 cursor-pointer"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-blue-500 animate-pulse" />
+              🪄 一键生成 Demo 简历模板并匹配 (极速体验)
+            </Button>
+          </div>
+
           <div className="max-w-2xl mx-auto flex gap-2 items-end">
             <Textarea
               value={input}

@@ -9,7 +9,7 @@ export type XiaojingState = "idle" | "listening" | "speaking" | "thinking" | "ce
 
 interface XiaojingMascotProps {
   state?: XiaojingState;
-  pose?: "idle" | "holding-resume" | "holding-tablet" | "waving" | "404";
+  pose?: "idle" | "holding-resume" | "holding-tablet" | "waving" | "404" | "standing";
   expression?: "smile" | "happy" | "confused" | "thinking" | "surprised";
   size?: number;
   animate?: boolean;
