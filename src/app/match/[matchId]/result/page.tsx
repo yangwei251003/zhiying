@@ -114,7 +114,7 @@ export default function MatchResultPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-neutral-50 py-8">
+    <div className="min-h-[calc(100vh-4rem)] bg-transparent py-8">
       <div className="container-page mx-auto px-4 md:px-8 max-w-5xl space-y-6">
         {/* 顶部：岗位信息 */}
         <motion.div
@@ -150,7 +150,7 @@ export default function MatchResultPage() {
 
         {/* 三分组匹配 */}
         <div>
-          <h2 className="text-base font-bold text-neutral-800 dark:text-white mb-3 px-1 print:text-black">
+          <h2 className="text-base font-bold text-neutral-800 mb-3 px-1 print:text-black">
             三分组匹配结果
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -159,25 +159,26 @@ export default function MatchResultPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
+              whileHover={{ y: -4 }}
             >
-              <Card className="h-full glass-card border-primary-500/20 text-white border-beam-hover">
-                <CardHeader className="pb-3 border-b border-white/5 bg-white/5">
-                  <CardTitle className="flex items-center gap-2 text-sm text-white print:text-black">
-                    <CheckCircle2 className="h-4 w-4 text-primary-400" />
+              <Card className="h-full glass-card-light border-primary-200 text-neutral-900 transition-shadow hover:shadow-lg">
+                <CardHeader className="pb-3 border-b border-primary-100/50 bg-primary-50/30">
+                  <CardTitle className="flex items-center gap-2 text-sm text-neutral-900 print:text-black">
+                    <CheckCircle2 className="h-4 w-4 text-primary-500" />
                     直接匹配 · {result.direct_matches.length} 项
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 pt-3">
                   {result.direct_matches.map((m, i) => (
-                    <div key={i} className="text-xs">
-                      <p className="text-neutral-200 print:text-black font-medium">{m.item}</p>
-                      <p className="text-neutral-400 print:text-neutral-600 mt-0.5">
-                        依据：<code className="text-[10px] bg-white/5 print:bg-neutral-100 text-neutral-300 print:text-neutral-700 px-1 py-0.5 rounded">{m.evidence}</code>
+                    <div key={i} className="text-xs group">
+                      <p className="text-neutral-800 print:text-black font-medium group-hover:text-primary-600 transition-colors">{m.item}</p>
+                      <p className="text-neutral-500 print:text-neutral-600 mt-0.5">
+                        依据：<code className="text-[10px] bg-primary-50 print:bg-neutral-100 text-primary-600 print:text-neutral-700 px-1 py-0.5 rounded">{m.evidence}</code>
                       </p>
                     </div>
                   ))}
-                  <div className="pt-2 mt-2 border-t border-white/5">
-                    <Badge variant="primary" size="sm">→ 进简历正文</Badge>
+                  <div className="pt-2 mt-2 border-t border-primary-100/50">
+                    <Badge variant="primary" size="sm" className="bg-primary-50 text-primary-600 border-primary-200 hover:bg-primary-100">→ 进简历正文</Badge>
                   </div>
                 </CardContent>
               </Card>
@@ -188,28 +189,29 @@ export default function MatchResultPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
+              whileHover={{ y: -4 }}
             >
-              <Card className="h-full glass-card border-accent-500/20 text-white border-beam-hover">
-                <CardHeader className="pb-3 border-b border-white/5 bg-white/5">
-                  <CardTitle className="flex items-center gap-2 text-sm text-white print:text-black">
-                    <Link2 className="h-4 w-4 text-accent-400" />
+              <Card className="h-full glass-card-light border-accent-200 text-neutral-900 transition-shadow hover:shadow-lg">
+                <CardHeader className="pb-3 border-b border-accent-100/50 bg-accent-50/30">
+                  <CardTitle className="flex items-center gap-2 text-sm text-neutral-900 print:text-black">
+                    <Link2 className="h-4 w-4 text-accent-500" />
                     可强调关联 · {result.associations.length} 项
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 pt-3">
                   {result.associations.map((a, i) => (
-                    <div key={i} className="text-xs">
-                      <p className="text-neutral-200 print:text-black font-medium">{a.item}</p>
-                      <p className="text-accent-400 mt-0.5">
+                    <div key={i} className="text-xs group">
+                      <p className="text-neutral-800 print:text-black font-medium group-hover:text-accent-600 transition-colors">{a.item}</p>
+                      <p className="text-accent-600 mt-0.5">
                         → 换角度为：<span className="font-semibold">{a.rephrasing_as}</span>
                       </p>
-                      <p className="text-neutral-400 print:text-neutral-600 mt-1 text-[11px] leading-relaxed">
+                      <p className="text-neutral-500 print:text-neutral-600 mt-1 text-[11px] leading-relaxed">
                         {a.how_to_bridge}
                       </p>
                     </div>
                   ))}
-                  <div className="pt-2 mt-2 border-t border-white/5">
-                    <Badge variant="accent" size="sm">→ 进简历正文</Badge>
+                  <div className="pt-2 mt-2 border-t border-accent-100/50">
+                    <Badge variant="accent" size="sm" className="bg-accent-50 text-accent-600 border-accent-200 hover:bg-accent-100">→ 进简历正文</Badge>
                   </div>
                 </CardContent>
               </Card>
@@ -220,26 +222,27 @@ export default function MatchResultPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
+              whileHover={{ y: -4 }}
             >
-              <Card className="h-full glass-card border-amber-500/20 text-white border-beam-hover">
-                <CardHeader className="pb-3 border-b border-white/5 bg-white/5">
-                  <CardTitle className="flex items-center gap-2 text-sm text-white print:text-black">
-                    <AlertTriangle className="h-4 w-4 text-amber-400" />
+              <Card className="h-full glass-card-light border-amber-200 text-neutral-900 transition-shadow hover:shadow-lg">
+                <CardHeader className="pb-3 border-b border-amber-100/50 bg-amber-50/30">
+                  <CardTitle className="flex items-center gap-2 text-sm text-neutral-900 print:text-black">
+                    <AlertTriangle className="h-4 w-4 text-amber-500" />
                     待补强项 · {result.gaps.length} 项
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 pt-3">
                   {result.gaps.map((g, i) => (
-                    <div key={i} className="text-xs">
-                      <p className="text-neutral-200 print:text-black font-medium">{g.skill}</p>
-                      <p className="text-neutral-400 print:text-neutral-600 mt-0.5">
-                        当前：<span className="text-amber-400">{g.level}</span>
+                    <div key={i} className="text-xs group">
+                      <p className="text-neutral-800 print:text-black font-medium group-hover:text-amber-600 transition-colors">{g.skill}</p>
+                      <p className="text-neutral-500 print:text-neutral-600 mt-0.5">
+                        当前：<span className="text-amber-600 font-medium">{g.level}</span>
                       </p>
-                      <p className="text-neutral-400 print:text-neutral-600 mt-0.5 text-[11px]">{g.reason}</p>
+                      <p className="text-neutral-500 print:text-neutral-600 mt-0.5 text-[11px]">{g.reason}</p>
                     </div>
                   ))}
-                  <div className="pt-2 mt-2 border-t border-white/5">
-                    <Badge variant="warning" size="sm">→ 不进简历，进学习路径</Badge>
+                  <div className="pt-2 mt-2 border-t border-amber-100/50">
+                    <Badge variant="warning" size="sm" className="bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100">→ 不进简历，进学习路径</Badge>
                   </div>
                 </CardContent>
               </Card>
@@ -263,15 +266,16 @@ export default function MatchResultPage() {
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {evaluationLabels.map((e) => (
-                  <div
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
                     key={e.key}
-                    className="rounded-lg border border-neutral-100 bg-neutral-50/50 p-3"
+                    className="rounded-lg border border-neutral-200/60 glass-card-light p-3 transition-colors hover:border-primary-300"
                   >
                     <p className="text-xs font-medium text-neutral-500 mb-1">{e.label}</p>
-                    <p className="text-sm text-neutral-800 leading-relaxed">
+                    <p className="text-sm text-neutral-800 leading-relaxed font-medium">
                       {(result.evaluation as any)[e.key]}
                     </p>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </CardContent>

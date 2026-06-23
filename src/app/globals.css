@@ -83,7 +83,7 @@
   }
 
   body {
-    @apply bg-[#030303] text-neutral-100 antialiased;
+    @apply bg-[#FAFAFC] text-neutral-900 antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
@@ -182,6 +182,16 @@
     box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5) !important;
   }
 
+  /* 明亮毛玻璃卡片（浅色背景使用） */
+  .glass-card-light {
+    background: rgba(255, 255, 255, 0.65) !important;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.04), inset 0 0 0 1px rgba(255, 255, 255, 0.5) !important;
+    transition: all 0.3s ease;
+  }
+
   /* 流光边缘 Hover 容器 */
   .border-beam-hover {
     position: relative;
@@ -211,7 +221,7 @@
     to { transform: rotate(360deg); }
   }
 
-  /* 全息极光背景 */
+  /* 全息极光背景 (Dark) */
   .aurora-bg {
     position: fixed;
     top: 0;
@@ -222,6 +232,59 @@
     background-color: #030303;
     overflow: hidden;
     pointer-events: none;
+  }
+
+  /* 全新获奖级明亮动态网格背景 (Light Mesh Gradient) */
+  .mesh-bg-light {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -2;
+    background-color: #FAFAFC;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .mesh-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.4;
+    mix-blend-mode: multiply;
+    animation: meshFloat 25s infinite alternate ease-in-out;
+  }
+
+  .mesh-blob-1 {
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, rgba(133, 183, 235, 0.6) 0%, transparent 70%);
+    top: -15%;
+    left: -15%;
+  }
+
+  .mesh-blob-2 {
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(253, 186, 140, 0.5) 0%, transparent 70%);
+    bottom: -10%;
+    right: -5%;
+    animation-delay: -7s;
+  }
+
+  .mesh-blob-3 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(55, 138, 221, 0.3) 0%, transparent 70%);
+    top: 30%;
+    left: 40%;
+    animation-delay: -12s;
+  }
+
+  @keyframes meshFloat {
+    0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+    100% { transform: translate(120px, 90px) scale(1.1) rotate(10deg); }
   }
 
   .aurora-glow {

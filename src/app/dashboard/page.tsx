@@ -82,7 +82,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-neutral-50">
+    <div className="min-h-[calc(100vh-4rem)] bg-transparent">
       <div className="container-page mx-auto px-4 md:px-8 py-8 max-w-5xl">
         {/* 顶部 */}
         <motion.div

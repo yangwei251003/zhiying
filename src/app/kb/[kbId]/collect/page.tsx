@@ -306,7 +306,7 @@ export default function CollectPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-neutral-50 flex">
+    <div className="min-h-[calc(100vh-4rem)] bg-transparent flex">
       {/* 左侧 Sidebar：进度 */}
       <aside className="hidden lg:flex w-72 border-r border-neutral-200 bg-white flex-col">
         <div className="p-5 border-b border-neutral-200">
@@ -348,7 +348,7 @@ export default function CollectPage() {
                   "w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors text-left",
                   idx === currentModule
                     ? "bg-primary-50 text-primary-700 font-medium"
-                    : "text-neutral-600 hover:bg-neutral-50"
+                    : "text-neutral-600 hover:bg-transparent"
                 )}
               >
                 <span className="flex-shrink-0">

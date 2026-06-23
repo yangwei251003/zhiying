@@ -67,12 +67,13 @@ export default function RootLayout({
         className={`${inter.variable} ${notoSansSC.variable} font-sans antialiased`}
       >
         <AuthProvider>
-          {/* 全息极光背景与噪点层 */}
-          <div className="aurora-bg">
-            <div className="aurora-glow glow-1" />
-            <div className="aurora-glow glow-2" />
+          {/* 明亮流光网格背景与噪点层 */}
+          <div className="mesh-bg-light">
+            <div className="mesh-blob mesh-blob-1" />
+            <div className="mesh-blob mesh-blob-2" />
+            <div className="mesh-blob mesh-blob-3" />
             <div className="noise-overlay" />
-            <div className="shimmer-grid" />
+            <div className="shimmer-grid !opacity-20" />
           </div>
 
           <div className="flex min-h-screen flex-col">

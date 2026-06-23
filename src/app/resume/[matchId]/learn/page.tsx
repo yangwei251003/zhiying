@@ -78,7 +78,7 @@ export default function LearnPage() {
   const matchId = params.matchId as string;
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-neutral-50 py-8">
+    <div className="min-h-[calc(100vh-4rem)] bg-transparent py-8">
       <div className="container-page mx-auto px-4 md:px-8 max-w-4xl space-y-6">
         {/* 顶部 */}
         <motion.div
@@ -241,7 +241,7 @@ export default function LearnPage() {
                   key={i}
                   className="group rounded-lg border border-neutral-100 overflow-hidden"
                 >
-                  <summary className="flex items-start gap-2 p-3 cursor-pointer hover:bg-neutral-50 list-none">
+                  <summary className="flex items-start gap-2 p-3 cursor-pointer hover:bg-transparent list-none">
                     <Badge variant={difficultyColors[item.difficulty]} size="sm">
                       {item.difficulty}
                     </Badge>

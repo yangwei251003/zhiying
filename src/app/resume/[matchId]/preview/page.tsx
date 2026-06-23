@@ -239,7 +239,7 @@ export default function ResumePreviewPage() {
                     open={m.expanded}
                     className="group rounded-lg border border-neutral-200 overflow-hidden"
                   >
-                    <summary className="flex items-center gap-2 p-3 cursor-pointer hover:bg-neutral-50 text-sm font-medium text-neutral-700 list-none">
+                    <summary className="flex items-center gap-2 p-3 cursor-pointer hover:bg-transparent text-sm font-medium text-neutral-700 list-none">
                       <m.icon className="h-4 w-4 text-neutral-500" />
                       <span className="flex-1">{m.label}</span>
                       <svg className="w-4 h-4 text-neutral-400 group-open:rotate-90 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
