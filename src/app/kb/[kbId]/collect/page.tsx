@@ -145,7 +145,10 @@ export default function CollectPage() {
 
       setTimeout(() => {
         // 将所有模块强行设为 done 已完成
-        const allDone = Object.fromEntries(KB_MODULE_NAMES.map((m) => [m, "done"]));
+        const allDone: Record<string, "current" | "done" | "pending"> = {};
+        KB_MODULE_NAMES.forEach((m) => {
+          allDone[m] = "done";
+        });
         setModuleStatus(allDone);
         setCurrentModule(KB_MODULE_NAMES.length - 1);
 
@@ -499,7 +502,10 @@ export default function CollectPage() {
                 setMascotSpeakText("小镜正在为您配置全套演示知识库...");
 
                 setTimeout(() => {
-                  const allDone = Object.fromEntries(KB_MODULE_NAMES.map((m) => [m, "done"]));
+                  const allDone: Record<string, "current" | "done" | "pending"> = {};
+                  KB_MODULE_NAMES.forEach((m) => {
+                    allDone[m] = "done";
+                  });
                   setModuleStatus(allDone);
                   setCurrentModule(KB_MODULE_NAMES.length - 1);
 
