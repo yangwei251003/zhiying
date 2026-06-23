@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 interface DataParticlesProps {
   className?: string;
@@ -15,7 +15,14 @@ interface DataParticlesProps {
  * 由小型几何元素（点、圆环、对勾、短横线）组成，缓慢漂浮上升
  */
 export function DataParticles({ className, count = 20, color = "mixed" }: DataParticlesProps) {
+  // 水合状态标记，解决 SSR 与 CSR 因 Math.random() 导致的 Hydration mismatch 报错
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const particles = useMemo(() => {
+    if (!mounted) return [];
     return Array.from({ length: count }).map((_, i) => ({
       id: i,
       x: Math.random() * 100,
@@ -33,7 +40,11 @@ export function DataParticles({ className, count = 20, color = "mixed" }: DataPa
           ? "text-primary-300"
           : "text-accent-300",
     }));
-  }, [count, color]);
+  }, [count, color, mounted]);
+
+  if (!mounted) {
+    return <div className={cn("pointer-events-none overflow-hidden", className)} />;
+  }
 
   return (
     <div className={cn("pointer-events-none overflow-hidden", className)}>

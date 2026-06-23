@@ -28,6 +28,9 @@ export function XiaojingMascot({
 }: XiaojingMascotProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   
+  // 强类型断言，防止 TypeScript 编译器对函数参数 state 进行收缩推导导致编译报错
+  const curState = state as XiaojingState;
+
   // 标志组件是否已挂载（Hydration 安全防护）
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -98,13 +101,13 @@ export function XiaojingMascot({
     ? "dizzy"
     : clickState === "shy"
       ? "happy" 
-      : state === "celebrating" || state === "welcome"
+      : curState === "celebrating" || curState === "welcome"
         ? "happy"
         : expression;
 
   // 嘴巴路径生成
   const getMouthPath = () => {
-    if (state === "speaking") {
+    if (curState === "speaking") {
       return "M 74 118 Q 88 126 102 118"; // 说话状态的嘴巴（由 Framer Motion 控制 speakLoop 动画）
     }
     if (clickState === "dizzy") {
@@ -124,7 +127,7 @@ export function XiaojingMascot({
     }
   };
 
-  const showQuestion = activeExpression === "confused" || state === "error";
+  const showQuestion = activeExpression === "confused" || curState === "error";
 
   // Mascot 身体动画变体
   const bodyVariants = {
@@ -185,7 +188,7 @@ export function XiaojingMascot({
         viewBox="0 0 176 200"
         className="w-full h-full overflow-visible"
         initial={animate && mounted ? { opacity: 0, y: 10 } : false}
-        animate={animate && mounted ? (state === "celebrating" || clickState === "dizzy" ? "bounce" : state === "error" ? "shake" : "float") : false}
+        animate={animate && mounted ? (curState === "celebrating" || clickState === "dizzy" ? "bounce" : curState === "error" ? "shake" : "float") : false}
         variants={bodyVariants}
       >
         <defs>
@@ -236,13 +239,13 @@ export function XiaojingMascot({
             rx="46"
             ry="7"
             fill="rgba(37,99,235,0.15)"
-            animate={{ scale: state === "celebrating" ? [1, 0.85, 1] : [1, 1.12, 1], opacity: [0.35, 0.15, 0.35] }}
+            animate={{ scale: curState === "celebrating" ? [1, 0.85, 1] : [1, 1.12, 1], opacity: [0.35, 0.15, 0.35] }}
             transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
           />
         )}
 
         {/* 全息扫描投影 (Listening/Scanning/Welcome 状态下投射) */}
-        {(state === "listening" || state === "thinking" || state === "welcome") && (
+        {(curState === "listening" || curState === "thinking" || curState === "welcome") && (
           <motion.polygon
             points="52,86 124,86 160,200 16,200"
             fill="url(#hologramGradient)"
@@ -377,13 +380,13 @@ export function XiaojingMascot({
                 <path d="M 60 72 Q 68 76 76 72" fill="none" stroke="#1D4ED8" strokeWidth="3" strokeLinecap="round" />
                 <path d="M 100 72 Q 108 76 116 72" fill="none" stroke="#1D4ED8" strokeWidth="3" strokeLinecap="round" />
               </>
-            ) : activeExpression === "happy" || state === "celebrating" || state === "welcome" ? (
+            ) : activeExpression === "happy" || curState === "celebrating" || curState === "welcome" ? (
               // 3. 开心/庆祝/害羞/欢迎眯眼笑 (> < 弯月牙眼)
               <>
                 <path d="M 60 74 Q 68 64 76 74" fill="none" stroke="#10B981" strokeWidth="3.5" strokeLinecap="round" />
                 <path d="M 100 74 Q 108 64 116 74" fill="none" stroke="#10B981" strokeWidth="3.5" strokeLinecap="round" />
               </>
-            ) : state === "listening" || state === "welcome" || activeExpression === "surprised" ? (
+            ) : curState === "listening" || activeExpression === "surprised" ? (
               // 4. 专注/扫描眼/欢迎 (微缩蔚蓝雷达同心圆 ⊙ ⊙)
               <>
                 <circle cx="68" cy="70" r="7" fill="none" stroke="#00F2FE" strokeWidth="2" />
@@ -391,7 +394,7 @@ export function XiaojingMascot({
                 <circle cx="108" cy="70" r="7" fill="none" stroke="#00F2FE" strokeWidth="2" />
                 <circle cx="108" cy="70" r="2.5" fill="#00F2FE" />
               </>
-            ) : activeExpression === "confused" || state === "error" ? (
+            ) : activeExpression === "confused" || curState === "error" ? (
               // 5. 困惑/错误大圆眼
               <>
                 <circle cx="68" cy="70" r="8" fill="#FEE2E2" stroke="#EF4444" strokeWidth="2.5" />
@@ -418,7 +421,7 @@ export function XiaojingMascot({
           </motion.g>
 
           {/* 嘴巴 (联动打字说话与各种表情) */}
-          {state === "speaking" && animate ? (
+          {curState === "speaking" && animate ? (
             <motion.path
               d="M 78 118 Q 88 124 98 118"
               fill="none"
@@ -491,7 +494,7 @@ export function XiaojingMascot({
               <circle cx="138" cy="114" r="6.5" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1" />
             </motion.g>
           </>
-        ) : state === "celebrating" ? (
+        ) : curState === "celebrating" ? (
           // 开心举起双手
           <>
             <motion.circle cx="42" cy="132" r="6.5" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1" animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.8 }} />
@@ -506,7 +509,7 @@ export function XiaojingMascot({
         )}
 
         {/* 专注全息浮空控制台 (Listening/Scanning 状态下浮现) */}
-        {(state === "listening" || state === "thinking" || state === "welcome") && (
+        {(curState === "listening" || curState === "thinking" || curState === "welcome") && (
           <motion.g
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 0.85, y: 0 }}
