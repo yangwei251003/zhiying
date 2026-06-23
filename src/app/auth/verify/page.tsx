@@ -56,7 +56,7 @@ function VerifyContent() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-50 to-primary-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-transparent px-4">
       <div className="w-full max-w-md">
         <Link
           href="/login"
@@ -66,7 +66,7 @@ function VerifyContent() {
           返回登录
         </Link>
 
-        <div className="bg-white rounded-2xl shadow-lg border border-neutral-200 p-8 space-y-6">
+        <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-lg border border-neutral-200/50 p-8 space-y-6">
           <div className="flex flex-col items-center gap-2">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center overflow-hidden">
               <XiaojingAvatar size={48} />

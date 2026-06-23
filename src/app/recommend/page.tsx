@@ -69,7 +69,7 @@ export default function RecommendPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-neutral-50 to-primary-50 py-10">
+    <div className="min-h-[calc(100vh-4rem)] bg-transparent py-10">
       <div className="container-page mx-auto px-4 md:px-8 max-w-4xl">
         {/* 顶部 */}
         <motion.div

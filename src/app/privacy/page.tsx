@@ -3,7 +3,7 @@ import { ShieldCheck } from "lucide-react";
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-white">
+    <div className="min-h-[calc(100vh-4rem)] bg-transparent">
       <div className="container-narrow mx-auto px-4 md:px-8 py-12 md:py-16">
         <div className="mb-8">
           <div className="inline-flex items-center gap-2 text-primary-600 mb-3">

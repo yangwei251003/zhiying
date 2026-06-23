@@ -3,7 +3,7 @@ import { Zap, Heart, Shield, Eye } from "lucide-react";
 
 export default function AboutPage() {
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-white">
+    <div className="min-h-[calc(100vh-4rem)] bg-transparent">
       <div className="container-narrow mx-auto px-4 md:px-8 py-12 md:py-20">
         <div className="text-center mb-12">
           <div className="inline-flex w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 items-center justify-center mb-4">

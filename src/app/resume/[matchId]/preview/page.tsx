@@ -196,10 +196,10 @@ export default function ResumePreviewPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-neutral-100">
+    <div className="min-h-[calc(100vh-4rem)] bg-neutral-100/50 backdrop-blur-sm">
       <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] min-h-[calc(100vh-4rem)]">
         {/* 左侧编辑面板 */}
-        <aside className="border-r border-neutral-200 bg-white flex flex-col print:hidden">
+        <aside className="border-r border-neutral-200 bg-white/75 backdrop-blur-md flex flex-col print:hidden">
           <div className="p-4 border-b border-neutral-200">
             <h2 className="text-sm font-semibold text-neutral-900 mb-3">编辑面板</h2>
             <div className="flex gap-1 bg-neutral-100 p-1 rounded-md">

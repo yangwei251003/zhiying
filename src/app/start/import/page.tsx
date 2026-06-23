@@ -116,7 +116,7 @@ export default function ImportResumePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-primary-50 relative overflow-hidden">
+    <div className="min-h-screen bg-transparent relative overflow-hidden">
       {/* 背景装饰 */}
       <DataParticles className="absolute inset-0 opacity-40" count={24} />
 

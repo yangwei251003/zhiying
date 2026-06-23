@@ -46,7 +46,7 @@ export default function StartPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-primary-50 relative overflow-hidden">
+    <div className="min-h-screen bg-transparent relative overflow-hidden">
       <DataParticles className="absolute inset-0 opacity-25" count={20} />
 
       <div className="container-page mx-auto px-4 md:px-8 py-12 md:py-20 relative z-10">

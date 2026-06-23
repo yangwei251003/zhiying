@@ -101,7 +101,7 @@ function LoginForm() {
         返回首页
       </Link>
 
-      <div className="bg-white rounded-2xl shadow-lg border border-neutral-200 p-8 space-y-5">
+      <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-lg border border-neutral-200/50 p-8 space-y-5">
         {/* Logo */}
         <div className="flex flex-col items-center gap-2">
           <Logo showText={false} size={48} />
@@ -158,7 +158,7 @@ function LoginForm() {
                   <div className="w-full border-t border-neutral-200" />
                 </div>
                 <div className="relative flex justify-center text-xs">
-                  <span className="bg-white px-3 text-neutral-400">其他方式</span>
+                  <span className="bg-white/40 backdrop-blur-sm px-3 rounded-full text-neutral-400">其他方式</span>
                 </div>
               </div>
 
@@ -182,7 +182,7 @@ function LoginForm() {
                 onClick={() => signInWithOAuth("github")}
               >
                 <Github className="mr-2 h-4 w-4" />
-                使用 GitHub 登录
+                {loading ? "登录中..." : "使用 GitHub 登录"}
               </Button>
             </div>
           </>
@@ -251,7 +251,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-50 to-primary-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-transparent px-4">
       <Suspense
         fallback={
           <div className="flex items-center justify-center">
