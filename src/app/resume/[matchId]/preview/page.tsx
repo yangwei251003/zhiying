@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/sonner";
 import {
@@ -13,7 +12,6 @@ import {
   Share2,
   Save,
   Edit3,
-  Eye,
   Link2,
   Loader2,
   CheckCircle2,
@@ -87,14 +85,97 @@ export default function ResumePreviewPage() {
   const [editing, setEditing] = useState(false);
   const [downloading, setDownloading] = useState<"word" | "pdf" | null>(null);
 
+  const [scale, setScale] = useState(1);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // 动态 A4 缩放
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const parentWidth = entry.contentRect.width;
+        const baseWidth = 820; // 考虑 A4 的 padding
+        const newScale = Math.min(1, parentWidth / baseWidth);
+        setScale(newScale);
+      }
+    });
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+    return () => resizeObserver.disconnect();
+  }, []);
+
   const handleDownload = async (format: "word" | "pdf") => {
     setDownloading(format);
     try {
-      // 实际项目调用 API
-      await new Promise((r) => setTimeout(r, 1200));
-      toast.success(`${format === "word" ? "Word" : "PDF"} 简历下载成功`, {
-        description: "请检查浏览器下载列表",
-      });
+      if (format === "word") {
+        const res = await fetch("/api/resume/download", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: resumeContent.personal.name,
+            contact_line: `${resumeContent.personal.phone} | ${resumeContent.personal.email} | ${resumeContent.personal.location}`,
+            sections: [
+              {
+                title: "教育背景",
+                entries: resumeContent.education.map(e => ({
+                  heading: e.school,
+                  subheading: `${e.major} · ${e.degree}`,
+                  date: e.period,
+                  bullets: [e.detail]
+                }))
+              },
+              {
+                title: "实习经历",
+                entries: resumeContent.experience.map(e => ({
+                  heading: e.org,
+                  subheading: e.role,
+                  date: e.period,
+                  bullets: e.bullets
+                }))
+              },
+              {
+                title: "项目经历",
+                entries: resumeContent.projects.map(p => ({
+                  heading: p.name,
+                  subheading: p.role,
+                  date: p.period,
+                  bullets: p.bullets
+                }))
+              },
+              {
+                title: "技能清单",
+                freeform_bullets: resumeContent.skills.map(s => `${s.name} (${s.level})`)
+              },
+              {
+                title: "自我评价",
+                freeform_bullets: [resumeContent.self_eval]
+              }
+            ]
+          })
+        });
+
+        if (!res.ok) throw new Error("下载失败");
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${resumeContent.personal.name}_简历.docx`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+
+        toast.success("Word 简历下载成功");
+      } else {
+        toast.info("正在调起系统打印，请在打印选项中选择「另存为 PDF」", {
+          duration: 4000
+        });
+        setTimeout(() => {
+          window.print();
+        }, 800);
+      }
     } catch {
       toast.error("下载失败，请重试");
     } finally {
@@ -264,19 +345,28 @@ export default function ResumePreviewPage() {
               </div>
             </div>
 
-            {/* A4 纸张预览 */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="bg-white shadow-lg mx-auto"
-              style={{
-                aspectRatio: "210 / 297",
-                maxWidth: "100%",
-                padding: "5%",
-                fontFamily: "'Microsoft YaHei', sans-serif",
-              }}
+            {/* 动态自适应缩放视口容器 */}
+            <div 
+              ref={containerRef} 
+              className="w-full relative flex items-start justify-center overflow-hidden"
+              style={{ height: `${1130 * scale}px` }}
             >
+              {/* A4 纸张预览 */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="bg-white shadow-lg flex-shrink-0"
+                style={{
+                  width: "800px",
+                  height: "1130px",
+                  padding: "40px",
+                  fontFamily: "'Microsoft YaHei', sans-serif",
+                  transform: `scale(${scale})`,
+                  transformOrigin: "top center",
+                  transition: "transform 0.1s ease-out",
+                }}
+              >
               <div className="h-full text-[10px] leading-tight text-neutral-800">
                 {/* 顶部：姓名+联系 */}
                 <div className="flex items-start justify-between mb-3 pb-2 border-b-2" style={{ borderColor: "#1F3864" }}>
@@ -395,6 +485,7 @@ export default function ResumePreviewPage() {
                 </section>
               </div>
             </motion.div>
+          </div>
 
             {/* 底部说明 */}
             <div className="mt-6 flex items-center justify-between text-xs">

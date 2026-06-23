@@ -2,12 +2,11 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
-import Link from "next/link";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Input, Textarea } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/input";
+
 import { toast } from "@/components/ui/sonner";
 import {
   Check,
@@ -17,10 +16,9 @@ import {
   Sparkles,
   Save,
   ArrowRight,
-  ArrowLeft,
-  Upload,
 } from "lucide-react";
 import { XiaojingAvatar } from "@/components/motion/xiaojing-avatar";
+import { XiaojingMascot, XiaojingState } from "@/components/motion/xiaojing-mascot";
 import {
   KB_MODULE_NAMES,
   KB_MODULE_LABELS,
@@ -62,9 +60,49 @@ export default function CollectPage() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const hasInitialized = useRef(false);
 
-  // 初始化欢迎语
+
+  const [mascotState, setMascotState] = useState<XiaojingState>("welcome");
+  const [mascotSpeakText, setMascotSpeakText] = useState("你好！我是您的职映助手小镜。");
+
+  const isAllComplete =
+    Object.values(moduleStatus).filter((s) => s === "done").length >=
+    KB_MODULE_NAMES.length;
+  // Welcome state on mount, then turn to idle after 4 seconds
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setMascotState("idle");
+      setMascotSpeakText("");
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Update mascot state based on loading and input
+  useEffect(() => {
+    if (mascotState === "speaking" || mascotState === "celebrating" || mascotState === "welcome") return;
+    
+    if (loading) {
+      setMascotState("thinking");
+    } else if (input.trim().length > 0) {
+      setMascotState("listening");
+    } else {
+      setMascotState("idle");
+    }
+  }, [loading, input, mascotState]);
+
+  // Handle all completed celebration state
+  useEffect(() => {
+    if (isAllComplete) {
+      setMascotState("celebrating");
+      setMascotSpeakText("太棒了！所有模块均已构建完成！");
+    }
+  }, [isAllComplete]);
+
+  // 初始化欢迎语（只运行一次，不跟随 currentModule 变化）
+  useEffect(() => {
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
     const moduleName = KB_MODULE_NAMES[currentModule];
     setMessages([
       {
@@ -74,7 +112,7 @@ export default function CollectPage() {
       },
     ]);
     setModuleStatus((prev) => ({ ...prev, [moduleName]: "current" }));
-  }, []);
+  }, [currentModule]);
 
   // 自动滚动
   useEffect(() => {
@@ -108,30 +146,73 @@ export default function CollectPage() {
       if (!res.ok) throw new Error("AI 服务暂时不可用");
       const data = await res.json();
 
+      // 仿真流式打字机回复
+      const replyText = data.reply || "收到，我们继续下一个问题。";
+      setMascotState("speaking");
+      setMascotSpeakText("小映正在分析您的经历...");
+
+      // 先放入一个空内容的 AI 消息
       setMessages((prev) => [
         ...prev,
         {
           role: "ai",
-          content: data.reply || "收到，我们继续下一个问题。",
+          content: "",
           timestamp: Date.now(),
-          options: data.options,
+          options: [],
         },
       ]);
 
-      // 如果 AI 标记本模块完成
-      if (data.module_complete) {
-        const moduleName = KB_MODULE_NAMES[currentModule];
-        setModuleStatus((prev) => ({ ...prev, [moduleName]: "done" }));
-        if (currentModule < KB_MODULE_NAMES.length - 1) {
-          const next = currentModule + 1;
-          setCurrentModule(next);
-          setModuleStatus((prev) => ({
-            ...prev,
-            [KB_MODULE_NAMES[next]]: "current",
-          }));
+      let currentLength = 0;
+      const interval = setInterval(() => {
+        currentLength += 2;
+        if (currentLength >= replyText.length) {
+          clearInterval(interval);
+          setMessages((prev) => {
+            const next = [...prev];
+            next[next.length - 1] = {
+              role: "ai",
+              content: replyText,
+              timestamp: Date.now(),
+              options: data.options,
+            };
+            return next;
+          });
+          setMascotState("idle");
+          setMascotSpeakText("");
+
+          // 仅在字打完后，再更新模块完成状态
+          if (data.module_complete) {
+            const moduleName = KB_MODULE_NAMES[currentModule];
+            setModuleStatus((prev) => ({ ...prev, [moduleName]: "done" }));
+            if (currentModule < KB_MODULE_NAMES.length - 1) {
+              const next = currentModule + 1;
+              setCurrentModule(next);
+              setModuleStatus((prev) => ({
+                ...prev,
+                [KB_MODULE_NAMES[next]]: "current",
+              }));
+            }
+          }
+        } else {
+          setMessages((prev) => {
+            const next = [...prev];
+            next[next.length - 1] = {
+              role: "ai",
+              content: replyText.slice(0, currentLength),
+              timestamp: Date.now(),
+            };
+            return next;
+          });
         }
-      }
-    } catch (err) {
+      }, 25);
+    } catch {
+      setMascotState("error");
+      setMascotSpeakText("糟糕，网络似乎开小差了...");
+      setTimeout(() => {
+        setMascotState("idle");
+        setMascotSpeakText("");
+      }, 4000);
+      
       // 降级：模拟 AI 回复
       setMessages((prev) => [
         ...prev,
@@ -171,9 +252,7 @@ export default function CollectPage() {
     ]);
   };
 
-  const isAllComplete =
-    Object.values(moduleStatus).filter((s) => s === "done").length >=
-    KB_MODULE_NAMES.length;
+
 
   const completedCount = Object.values(moduleStatus).filter((s) => s === "done").length;
   const progressPct = Math.round((completedCount / KB_MODULE_NAMES.length) * 100);
@@ -189,6 +268,11 @@ export default function CollectPage() {
         <div className="p-5 border-b border-neutral-200">
           <h2 className="text-sm font-semibold text-neutral-900 mb-1">知识库收集</h2>
           <p className="text-xs text-neutral-500">9 模块结构化收集</p>
+        </div>
+
+        {/* Mascot representation */}
+        <div className="p-4 border-b border-neutral-200 flex flex-col items-center justify-center bg-neutral-50/50 min-h-[160px]">
+          <XiaojingMascot state={mascotState} size={120} speakText={mascotSpeakText} />
         </div>
 
         {/* 进度条 */}

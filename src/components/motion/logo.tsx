@@ -10,6 +10,7 @@ interface LogoProps {
   showEnglish?: boolean;
   size?: number;
   href?: string;
+  darkMode?: boolean;
 }
 
 /**
@@ -22,6 +23,7 @@ export function Logo({
   showEnglish = true,
   size = 32,
   href = "/",
+  darkMode = false,
 }: LogoProps) {
   const content = (
     <div className={cn("flex items-center gap-2", className)}>
@@ -36,9 +38,9 @@ export function Logo({
       </div>
       {showText && (
         <div className="flex items-center gap-1.5">
-          <span className="text-lg font-semibold text-neutral-900">职映</span>
+          <span className={`text-lg font-semibold ${darkMode ? "text-white" : "text-neutral-900"}`}>职映</span>
           {showEnglish && (
-            <span className="hidden sm:inline-block text-sm text-primary-600 font-medium">
+            <span className={`hidden sm:inline-block text-sm font-medium ${darkMode ? "text-primary-300" : "text-primary-600"}`}>
               ZhiYing
             </span>
           )}

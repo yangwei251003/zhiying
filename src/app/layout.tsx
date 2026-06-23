@@ -54,6 +54,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { CopilotWidget } from "@/components/layout/copilot-widget";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -65,12 +67,21 @@ export default function RootLayout({
         className={`${inter.variable} ${notoSansSC.variable} font-sans antialiased`}
       >
         <AuthProvider>
+          {/* 全息极光背景与噪点层 */}
+          <div className="aurora-bg">
+            <div className="aurora-glow glow-1" />
+            <div className="aurora-glow glow-2" />
+            <div className="noise-overlay" />
+            <div className="shimmer-grid" />
+          </div>
+
           <div className="flex min-h-screen flex-col">
             <Navbar />
             <main className="flex-1"><Suspense fallback={null}>{children}</Suspense></main>
             <Footer />
           </div>
           <Toaster />
+          <CopilotWidget />
         </AuthProvider>
       </body>
     </html>

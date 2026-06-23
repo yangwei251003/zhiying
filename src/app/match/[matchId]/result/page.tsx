@@ -144,7 +144,7 @@ export default function MatchResultPage() {
 
         {/* 三分组匹配 */}
         <div>
-          <h2 className="text-base font-semibold text-neutral-900 mb-3 px-1">
+          <h2 className="text-base font-bold text-white mb-3 px-1">
             三分组匹配结果
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -154,23 +154,23 @@ export default function MatchResultPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <Card className="h-full border-primary-200 bg-primary-50/30">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-sm">
-                    <CheckCircle2 className="h-4 w-4 text-primary-600" />
+              <Card className="h-full glass-card border-primary-500/20 text-white border-beam-hover">
+                <CardHeader className="pb-3 border-b border-white/5 bg-white/5">
+                  <CardTitle className="flex items-center gap-2 text-sm text-white">
+                    <CheckCircle2 className="h-4 w-4 text-primary-400" />
                     直接匹配 · {result.direct_matches.length} 项
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className="space-y-3 pt-3">
                   {result.direct_matches.map((m, i) => (
                     <div key={i} className="text-xs">
-                      <p className="text-neutral-800 font-medium">{m.item}</p>
+                      <p className="text-neutral-200 font-medium">{m.item}</p>
                       <p className="text-neutral-400 mt-0.5">
-                        依据：<code className="text-[10px] bg-white px-1 py-0.5 rounded">{m.evidence}</code>
+                        依据：<code className="text-[10px] bg-white/5 text-neutral-300 px-1 py-0.5 rounded">{m.evidence}</code>
                       </p>
                     </div>
                   ))}
-                  <div className="pt-2 mt-2 border-t border-primary-100">
+                  <div className="pt-2 mt-2 border-t border-white/5">
                     <Badge variant="primary" size="sm">→ 进简历正文</Badge>
                   </div>
                 </CardContent>
@@ -183,26 +183,26 @@ export default function MatchResultPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <Card className="h-full border-accent-200 bg-accent-50/30">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-sm">
-                    <Link2 className="h-4 w-4 text-accent-600" />
+              <Card className="h-full glass-card border-accent-500/20 text-white border-beam-hover">
+                <CardHeader className="pb-3 border-b border-white/5 bg-white/5">
+                  <CardTitle className="flex items-center gap-2 text-sm text-white">
+                    <Link2 className="h-4 w-4 text-accent-400" />
                     可强调关联 · {result.associations.length} 项
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-3 pt-3">
                   {result.associations.map((a, i) => (
                     <div key={i} className="text-xs">
-                      <p className="text-neutral-800 font-medium">{a.item}</p>
-                      <p className="text-accent-700 mt-0.5">
-                        → 换角度为：<span className="font-medium">{a.rephrasing_as}</span>
+                      <p className="text-neutral-200 font-medium">{a.item}</p>
+                      <p className="text-accent-400 mt-0.5">
+                        → 换角度为：<span className="font-semibold">{a.rephrasing_as}</span>
                       </p>
                       <p className="text-neutral-400 mt-1 text-[11px] leading-relaxed">
                         {a.how_to_bridge}
                       </p>
                     </div>
                   ))}
-                  <div className="pt-2 mt-2 border-t border-accent-100">
+                  <div className="pt-2 mt-2 border-t border-white/5">
                     <Badge variant="accent" size="sm">→ 进简历正文</Badge>
                   </div>
                 </CardContent>
@@ -215,24 +215,24 @@ export default function MatchResultPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <Card className="h-full border-amber-200 bg-amber-50/30">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-sm">
-                    <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <Card className="h-full glass-card border-amber-500/20 text-white border-beam-hover">
+                <CardHeader className="pb-3 border-b border-white/5 bg-white/5">
+                  <CardTitle className="flex items-center gap-2 text-sm text-white">
+                    <AlertTriangle className="h-4 w-4 text-amber-400" />
                     待补强项 · {result.gaps.length} 项
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className="space-y-3 pt-3">
                   {result.gaps.map((g, i) => (
                     <div key={i} className="text-xs">
-                      <p className="text-neutral-800 font-medium">{g.skill}</p>
-                      <p className="text-neutral-500 mt-0.5">
-                        当前：<span className="text-amber-700">{g.level}</span>
+                      <p className="text-neutral-200 font-medium">{g.skill}</p>
+                      <p className="text-neutral-400 mt-0.5">
+                        当前：<span className="text-amber-400">{g.level}</span>
                       </p>
                       <p className="text-neutral-400 mt-0.5 text-[11px]">{g.reason}</p>
                     </div>
                   ))}
-                  <div className="pt-2 mt-2 border-t border-amber-100">
+                  <div className="pt-2 mt-2 border-t border-white/5">
                     <Badge variant="warning" size="sm">→ 不进简历，进学习路径</Badge>
                   </div>
                 </CardContent>

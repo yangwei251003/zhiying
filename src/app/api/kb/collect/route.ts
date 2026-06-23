@@ -194,7 +194,7 @@ export async function POST(req: NextRequest) {
       options,
       next_question: parsed.next_question || "",
     });
-  } catch (err) {
+  } catch {
     return NextResponse.json(
       { error: { code: "INTERNAL_ERROR", message: "服务异常" } },
       { status: 500 }

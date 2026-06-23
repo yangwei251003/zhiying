@@ -15,7 +15,6 @@ import {
   DollarSign,
   Clock,
   Zap,
-  Users,
 } from "lucide-react";
 
 const marketData = {

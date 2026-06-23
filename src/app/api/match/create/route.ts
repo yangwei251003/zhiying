@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
         estimated_time_sec: 15,
       },
     });
-  } catch (err) {
+  } catch {
     return NextResponse.json(
       { error: { code: "INTERNAL_ERROR", message: "创建匹配失败" } },
       { status: 500 }

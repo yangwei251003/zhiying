@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { match_id, options } = body;
+    const { match_id } = body;
 
     if (!match_id) {
       return NextResponse.json(
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
         word_count: 420,
       },
     });
-  } catch (err) {
+  } catch {
     return NextResponse.json(
       { error: { code: "INTERNAL_ERROR", message: "简历生成失败" } },
       { status: 500 }

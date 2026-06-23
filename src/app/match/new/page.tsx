@@ -50,7 +50,7 @@ export default function MatchCreatePage() {
 
       // 跳转到结果页（带 loading 状态轮询）
       router.push(`/match/${data.match_id}/result`);
-    } catch (err) {
+    } catch {
       // 降级：模拟创建 matchId，跳转
       const mockMatchId = `mock_${Date.now()}`;
       toast("AI 服务正在准备中，先用演示数据展示", {

@@ -57,26 +57,33 @@
     /* ===== Shadow ===== */
     --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
     --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
-    --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.12);
-    --shadow-glow: 0 0 0 4px rgba(31, 111, 191, 0.15);
+    --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.15);
+    --shadow-glow: 0 0 0 3px rgba(31, 111, 191, 0.3), 0 0 20px rgba(31, 111, 191, 0.15);
+    --shadow-glow-accent: 0 0 20px rgba(249, 115, 22, 0.35);
 
     /* ===== Background & Foreground ===== */
-    --bg-primary: #FFFFFF;
-    --bg-secondary: #F8FAFC;
-    --bg-tertiary: #F1F5F9;
-    --text-primary: #1E293B;
-    --text-secondary: #64748B;
-    --text-muted: #94A3B8;
-    --border-default: #E2E8F0;
-    --border-strong: #CBD5E1;
+    --bg-primary: #06060c;
+    --bg-secondary: #0f0f18;
+    --bg-tertiary: #161622;
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #64748b;
+    --border-default: rgba(255, 255, 255, 0.06);
+    --border-strong: rgba(255, 255, 255, 0.12);
+
+    /* ===== Dark Section Colors ===== */
+    --dark-bg: #040E1E;
+    --dark-bg-mid: #071830;
+    --dark-bg-card: rgba(255, 255, 255, 0.05);
+    --dark-border: rgba(255, 255, 255, 0.10);
   }
 
   * {
-    @apply border-neutral-200;
+    border-color: rgba(255, 255, 255, 0.08);
   }
 
   body {
-    @apply bg-white text-neutral-800 antialiased;
+    @apply bg-[#030303] text-neutral-100 antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
@@ -111,9 +118,253 @@
   }
 
   .gradient-text {
-    background: linear-gradient(135deg, var(--primary-500), var(--accent-500));
+    background: linear-gradient(135deg, var(--primary-400), var(--accent-400));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+
+  .gradient-text-warm {
+    background: linear-gradient(135deg, #60A5FA, var(--accent-400));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* 全息磨砂玻璃卡片 */
+  .glass-card {
+    background: rgba(15, 15, 25, 0.45) !important;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
+  }
+
+  /* 渐变折射毛玻璃边框卡片 */
+  .refractive-glass {
+    background: rgba(8, 8, 14, 0.4) !important;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid transparent !important;
+    background-image: 
+      linear-gradient(rgba(8, 8, 14, 0.4), rgba(8, 8, 14, 0.4)), 
+      linear-gradient(135deg, rgba(96, 165, 250, 0.25) 0%, rgba(255, 255, 255, 0.04) 50%, rgba(249, 115, 22, 0.15) 100%);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  /* 3D 微光网格背景 */
+  .shimmer-grid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+    background-image: 
+      linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+    background-size: 60px 60px;
+    background-position: center;
+    mask-image: radial-gradient(circle at center, black 20%, transparent 80%);
+    -webkit-mask-image: radial-gradient(circle at center, black 20%, transparent 80%);
+    opacity: 0.8;
+  }
+
+  /* 磨砂玻璃卡片（深色背景区使用）*/
+  .glass-card-dark {
+    background: rgba(10, 10, 15, 0.6) !important;
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5) !important;
+  }
+
+  /* 流光边缘 Hover 容器 */
+  .border-beam-hover {
+    position: relative;
+    z-index: 1;
+  }
+
+  .border-beam-hover::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 0deg, transparent, var(--primary-500), transparent, var(--accent-500), transparent);
+    animation: rotateFlow 6s linear infinite;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .border-beam-hover:hover::after {
+    opacity: 0.45;
+  }
+
+  @keyframes rotateFlow {
+    to { transform: rotate(360deg); }
+  }
+
+  /* 全息极光背景 */
+  .aurora-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -2;
+    background-color: #030303;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .aurora-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(140px);
+    opacity: 0.15;
+    mix-blend-mode: screen;
+    animation: auroraMove 25s infinite alternate ease-in-out;
+  }
+
+  .glow-1 {
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(31, 111, 191, 0.5) 0%, transparent 80%);
+    top: -10%;
+    left: -10%;
+  }
+
+  .glow-2 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(168, 85, 247, 0.4) 0%, transparent 80%);
+    bottom: -10%;
+    right: -10%;
+    animation-delay: -5s;
+  }
+
+  @keyframes auroraMove {
+    0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+    100% { transform: translate(100px, 80px) scale(1.2) rotate(180deg); }
+  }
+
+  /* Hero 深色背景区 */
+  .hero-bg {
+    background: linear-gradient(135deg, #040E1E 0%, #071830 50%, #0B2347 100%);
+  }
+
+  /* 深色 Section 背景 */
+  .dark-section-bg {
+    background: linear-gradient(180deg, #040E1E 0%, #06122A 100%);
+  }
+
+  /* 按钮 glow 效果 */
+  .btn-glow:hover {
+    box-shadow: 0 0 0 3px rgba(31, 111, 191, 0.25), 0 0 24px rgba(31, 111, 191, 0.35);
+  }
+
+  .btn-glow-accent:hover {
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.25), 0 0 24px rgba(249, 115, 22, 0.35);
+  }
+
+  /* 霓虹光斑 */
+  .neon-orb {
+    border-radius: 9999px;
+    filter: blur(80px);
+    pointer-events: none;
+    position: absolute;
+  }
 }
+
+/* ===== 浮动动画 ===== */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-14px); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-8px) rotate(1deg); }
+  66% { transform: translateY(-14px) rotate(-1deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-float {
+  animation: float 3.5s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 5s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2.5s ease-in-out infinite;
+}
+
+/* ===== Awwwards-style Grain Noise Overlay ===== */
+.noise-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  content: "";
+  opacity: 0.025;
+  pointer-events: none;
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* ===== Dynamic Running Light Border ===== */
+@keyframes border-run {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.glow-border-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.glow-border-card::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 180deg,
+    transparent 60%,
+    var(--primary-400) 80%,
+    var(--accent-400) 90%,
+    transparent 100%
+  );
+  animation: border-run 6s linear infinite;
+  z-index: 0;
+}
+
+.glow-border-card-inner {
+  position: relative;
+  z-index: 2;
+  margin: 1px;
+  border-radius: inherit;
+  background: rgba(4, 14, 30, 0.94);
+  backdrop-filter: blur(12px);
+}
+

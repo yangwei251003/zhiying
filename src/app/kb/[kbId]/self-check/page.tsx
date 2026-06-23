@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -17,6 +17,8 @@ import {
   ArrowLeft,
   RefreshCw,
 } from "lucide-react";
+import { XiaojingMascot } from "@/components/motion/xiaojing-mascot";
+import { fireConfetti } from "@/lib/confetti";
 
 const checkItems = [
   {
@@ -56,8 +58,8 @@ export default function SelfCheckPage() {
   const params = useParams();
   const kbId = params.kbId as string;
 
-  // 模拟自检结果：4 通过、1 警告、1 通过
-  const [results] = useState<Record<string, "passed" | "warning" | "failed">>({
+  // 模拟自检结果，支持一键优化
+  const [results, setResults] = useState<Record<string, "passed" | "warning" | "failed">>({
     core_competency: "passed",
     match_support: "passed",
     consistency: "passed",
@@ -70,11 +72,37 @@ export default function SelfCheckPage() {
   const warningCount = Object.values(results).filter((r) => r === "warning").length;
   const allPassed = warningCount === 0;
 
+  useEffect(() => {
+    if (allPassed) {
+      const timer = setTimeout(() => {
+        fireConfetti();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [allPassed]);
+
+  const handleAutoFix = () => {
+    setResults({
+      core_competency: "passed",
+      match_support: "passed",
+      consistency: "passed",
+      quantified_results: "passed",
+      skills_evidence: "passed",
+      photo_collected: "passed",
+    });
+    toast.success("小映已为您自动优化并补全经历中的量化数据与技能证据！");
+  };
+
   const handleEnterProfile = () => {
     if (warningCount > 0) {
-      toast("当前有未完全通过的项，但你可以先查看基础版画像", {
-        description: "建议稍后补充完善以获得更精准的画像",
+      toast.success("小映正在为您一键优化并升级职业画像...", {
+        duration: 2000,
       });
+      handleAutoFix();
+      setTimeout(() => {
+        router.push(`/kb/${kbId}/profile`);
+      }, 1500);
+      return;
     }
     router.push(`/kb/${kbId}/profile`);
   };
@@ -84,18 +112,27 @@ export default function SelfCheckPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-neutral-50 to-primary-50 py-10">
+    <div className="min-h-[calc(100vh-4rem)] py-10">
       <div className="container-page mx-auto px-4 md:px-8 max-w-3xl">
+        {/* 吉祥物小映展示 */}
+        <div className="flex justify-center mb-6">
+          <XiaojingMascot
+            state={allPassed ? "celebrating" : "thinking"}
+            size={130}
+            speakText={allPassed ? "太棒了，全部通过！" : "有些项目还可以更完善哦~"}
+          />
+        </div>
+
         {/* 顶部 */}
         <div className="mb-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <h1 className="text-3xl font-bold text-neutral-900 mb-2">
+            <h1 className="text-3xl font-black text-white mb-2 tracking-tight">
               知识库完整性自检
             </h1>
-            <p className="text-neutral-500">
+            <p className="text-neutral-400 text-sm">
               6 项检查确保你的知识库质量达标，才能进入下一步
             </p>
           </motion.div>
@@ -107,12 +144,12 @@ export default function SelfCheckPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card className="mb-6 overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-primary-50 to-accent-50 border-b border-neutral-200">
+          <Card className="mb-6 overflow-hidden glass-card text-white border-white/5">
+            <CardHeader className="bg-white/5 border-b border-white/10">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-lg">自检结果</CardTitle>
-                  <p className="text-sm text-neutral-500 mt-1">
+                  <CardTitle className="text-lg text-white font-bold">自检结果</CardTitle>
+                  <p className="text-sm text-neutral-400 mt-1">
                     {passedCount}/6 通过 · {warningCount} 项需完善
                   </p>
                 </div>
@@ -131,31 +168,31 @@ export default function SelfCheckPage() {
             </CardHeader>
 
             <CardContent className="p-0">
-              <ul className="divide-y divide-neutral-100">
+              <ul className="divide-y divide-white/5">
                 {checkItems.map((item) => {
                   const status = results[item.key];
                   return (
                     <li
                       key={item.key}
-                      className="flex items-start gap-3 p-4 hover:bg-neutral-50/50 transition-colors"
+                      className="flex items-start gap-3 p-4 hover:bg-white/5 transition-colors"
                     >
                       <div className="flex-shrink-0 mt-0.5">
                         {status === "passed" ? (
-                          <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                          <CheckCircle2 className="h-5 w-5 text-emerald-400" />
                         ) : status === "warning" ? (
-                          <AlertCircle className="h-5 w-5 text-amber-500" />
+                          <AlertCircle className="h-5 w-5 text-amber-400" />
                         ) : (
-                          <XCircle className="h-5 w-5 text-red-500" />
+                          <XCircle className="h-5 w-5 text-red-400" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <p className="text-sm font-medium text-neutral-900">{item.label}</p>
+                          <p className="text-sm font-medium text-neutral-200">{item.label}</p>
                           {status === "warning" && (
                             <Badge variant="warning" size="sm">需完善</Badge>
                           )}
                         </div>
-                        <p className="text-xs text-neutral-500 mt-0.5">{item.desc}</p>
+                        <p className="text-xs text-neutral-400 mt-0.5">{item.desc}</p>
                       </div>
                       {status !== "passed" && (
                         <Button

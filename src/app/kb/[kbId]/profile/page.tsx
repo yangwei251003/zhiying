@@ -5,12 +5,10 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   Target,
   RefreshCw,
   AlertTriangle,
-  Lightbulb,
   ArrowRight,
   Star,
   Briefcase,
@@ -61,31 +59,32 @@ export default function ProfilePage() {
   const kbId = params.kbId as string;
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-neutral-50 py-8 md:py-12">
+    <div className="min-h-[calc(100vh-4rem)] py-8 md:py-12">
       <div className="container-page mx-auto px-4 md:px-8 max-w-5xl space-y-6">
         {/* 顶部：用户信息卡 */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <Card className="overflow-hidden">
-            <div className="bg-gradient-to-r from-primary-500 to-primary-600 p-6 text-white">
+          <Card className="overflow-hidden glass-card border-white/5">
+            <div className="bg-gradient-to-r from-primary-900/60 to-primary-800/40 p-6 text-white">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-2xl font-bold">
+                  <div className="w-16 h-16 rounded-full bg-white/10 border border-white/20 backdrop-blur flex items-center justify-center text-2xl font-bold">
                     {profile.name.charAt(0)}
                   </div>
                   <div>
-                    <h1 className="text-xl font-bold">{profile.name} 的个人职业画像</h1>
-                    <p className="text-sm text-primary-100 mt-1">
+                    <h1 className="text-xl font-black text-white">{profile.name} 的个人职业画像</h1>
+                    <p className="text-sm text-neutral-300 mt-1">
                       {profile.major} · {profile.grade} · 意向：{profile.target}
                     </p>
                   </div>
                 </div>
                 <div className="flex gap-2">
                   <Button
-                    variant="secondary"
+                    variant="outline"
                     size="sm"
+                    className="border-white/10 hover:bg-white/10 text-white"
                     onClick={() => router.push(`/kb/${kbId}/collect`)}
                   >
                     <RefreshCw className="mr-2 h-3.5 w-3.5" />
@@ -111,9 +110,9 @@ export default function ProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card>
+          <Card className="glass-card border-white/5 text-white">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-white">
                 <Star className="h-5 w-5 text-amber-500" />
                 三大核心竞争力
               </CardTitle>
@@ -134,7 +133,7 @@ export default function ProfilePage() {
                       </span>
                       <h3 className="text-sm font-semibold text-neutral-900">{c.title}</h3>
                     </div>
-                    <p className="text-xs text-neutral-600 leading-relaxed">
+                    <p className="text-xs text-neutral-300 leading-relaxed">
                       <span className="text-neutral-400">依据：</span>
                       {c.evidence}
                     </p>
@@ -152,18 +151,18 @@ export default function ProfilePage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <Card className="h-full">
+            <Card className="h-full glass-card border-white/5 text-white">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <RefreshCw className="h-4 w-4 text-primary-500" />
+                <CardTitle className="flex items-center gap-2 text-base text-white">
+                  <RefreshCw className="h-4 w-4 text-primary-400" />
                   可迁移能力
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
                   {profile.transferable.map((t) => (
-                    <li key={t} className="flex items-start gap-2 text-sm text-neutral-700">
-                      <span className="text-primary-500 mt-1">•</span>
+                    <li key={t} className="flex items-start gap-2 text-sm text-neutral-200">
+                      <span className="text-primary-400 mt-1">•</span>
                       <span>{t}</span>
                     </li>
                   ))}
@@ -177,23 +176,23 @@ export default function ProfilePage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.25 }}
           >
-            <Card className="h-full border-amber-200">
+            <Card className="h-full glass-card border-amber-500/20 text-white">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <AlertTriangle className="h-4 w-4 text-amber-500" />
+                <CardTitle className="flex items-center gap-2 text-base text-white">
+                  <AlertTriangle className="h-4 w-4 text-amber-400" />
                   素材不足（待补强）
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
                   {profile.gaps.map((g) => (
-                    <li key={g} className="flex items-start gap-2 text-sm text-neutral-700">
-                      <span className="text-amber-500 mt-1">•</span>
+                    <li key={g} className="flex items-start gap-2 text-sm text-neutral-200">
+                      <span className="text-amber-400 mt-1">•</span>
                       <span>{g}</span>
                     </li>
                   ))}
                 </ul>
-                <p className="text-xs text-neutral-400 mt-3 pt-3 border-t border-neutral-100">
+                <p className="text-xs text-neutral-400 mt-3 pt-3 border-t border-white/5">
                   这些不会出现在简历正文，但会影响画像精准度
                 </p>
               </CardContent>
@@ -207,10 +206,10 @@ export default function ProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <Card>
+          <Card className="glass-card border-white/5 text-white">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Briefcase className="h-5 w-5 text-primary-500" />
+              <CardTitle className="flex items-center gap-2 text-white">
+                <Briefcase className="h-5 w-5 text-primary-400" />
                 最适合的岗位方向
               </CardTitle>
             </CardHeader>
@@ -220,7 +219,7 @@ export default function ProfilePage() {
                   <Link
                     key={r}
                     href={`/research/${encodeURIComponent(r)}`}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-primary-200 bg-primary-50 px-4 py-2 text-sm font-medium text-primary-700 hover:bg-primary-100 transition-colors"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white hover:bg-white/10 transition-colors"
                   >
                     {r}
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -240,10 +239,10 @@ export default function ProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
         >
-          <Card>
+          <Card className="glass-card border-white/5 text-white">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Award className="h-5 w-5 text-accent-500" />
+              <CardTitle className="flex items-center gap-2 text-white">
+                <Award className="h-5 w-5 text-accent-400" />
                 经历亮点
               </CardTitle>
             </CardHeader>
@@ -251,8 +250,8 @@ export default function ProfilePage() {
               <ul className="space-y-3">
                 {profile.highlights.map((h) => (
                   <li key={h} className="flex items-start gap-2 text-sm">
-                    <TrendingUp className="h-4 w-4 text-emerald-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-neutral-700">{h}</span>
+                    <TrendingUp className="h-4 w-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-neutral-200">{h}</span>
                   </li>
                 ))}
               </ul>
@@ -271,7 +270,7 @@ export default function ProfilePage() {
             size="lg"
             variant="primary"
             onClick={() => router.push(`/match/new?kb=${kbId}`)}
-            className="px-8"
+            className="px-8 btn-glow bg-primary-500 hover:bg-primary-400 text-white"
           >
             <Target className="mr-2 h-4 w-4" />
             开始匹配你的目标岗位

@@ -1,435 +1,592 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-export type XiaojingExpression = "smile" | "confused" | "thinking" | "surprised" | "happy";
-export type XiaojingPose = "standing" | "holding-resume" | "holding-tablet" | "404" | "waving";
-
 interface XiaojingMascotProps {
-  className?: string;
-  expression?: XiaojingExpression;
-  pose?: XiaojingPose;
+  state?: "idle" | "listening" | "speaking" | "thinking" | "celebrating" | "error";
+  pose?: "idle" | "holding-resume" | "holding-tablet" | "waving" | "404";
+  expression?: "smile" | "happy" | "confused" | "thinking" | "surprised";
   size?: number;
   animate?: boolean;
+  className?: string;
+  speakText?: string;
 }
 
-/**
- * 职映小镜 —— 可拆解、可动画的 SVG IP 组件
- *
- * 拆解元素：
- * - 头部/护目镜（带扫描光效）
- * - 耳机（带脉冲光环）
- * - 蓝色头发/刘海
- * - 眼睛（支持表情）
- * - 身体/白大褂
- * - 蓝色披风（带飘动）
- * - 手持物（简历/平板/放大镜）
- */
 export function XiaojingMascot({
-  className,
+  state = "idle",
+  pose = "idle",
   expression = "smile",
-  pose = "standing",
-  size = 200,
+  size = 180,
   animate = true,
+  className,
+  speakText
 }: XiaojingMascotProps) {
-  // 眼睛形态根据表情变化
-  const eyeScaleY = expression === "surprised" ? 1.25 : expression === "happy" ? 0.7 : 1;
-  const mouthPath =
-    expression === "smile"
-      ? "M 72 118 Q 88 128 104 118"
-      : expression === "happy"
-      ? "M 72 116 Q 88 132 104 116"
-      : expression === "confused"
-      ? "M 78 124 Q 88 120 98 124"
-      : expression === "thinking"
-      ? "M 80 122 Q 88 124 96 122"
-      : "M 78 120 Q 88 128 98 120";
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  // 随机眨眼逻辑
+  const [blink, setBlink] = useState(false);
+  useEffect(() => {
+    if (!animate) return;
+    const interval = setInterval(() => {
+      setBlink(true);
+      setTimeout(() => setBlink(false), 180);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [animate]);
 
-  const showTeardrop = expression === "confused" || expression === "thinking";
-  const showQuestion = expression === "confused";
+  // 点击彩蛋状态："none" | "dizzy" (眩晕) | "shy" (害羞) | "salute" (敬礼)
+  const [clickState, setClickState] = useState<"none" | "dizzy" | "shy" | "salute">("none");
+
+  // 视差跟随 Motion Values
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const springConfig = { stiffness: 120, damping: 14 };
+  const headX = useSpring(mouseX, springConfig);
+  const headY = useSpring(mouseY, springConfig);
+
+  // 不同层级的视差系数，创造 3D 景深感
+  const hairX = useTransform(headX, (x) => x * 0.4);
+  const hairY = useTransform(headY, (y) => y * 0.4);
+  const eyeX = useTransform(headX, (x) => x * 0.85);
+  const eyeY = useTransform(headY, (y) => y * 0.85);
+  const visorX = useTransform(headX, (x) => x * 0.65);
+  const visorY = useTransform(headY, (y) => y * 0.65);
+  const faceX = useTransform(headX, (x) => x * 0.55);
+  const faceY = useTransform(headY, (y) => y * 0.55);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const dx = (e.clientX - centerX) / (window.innerWidth / 2);
+      const dy = (e.clientY - centerY) / (window.innerHeight / 2);
+      // 限制偏转在 -8px 到 8px 内
+      mouseX.set(Math.max(-1, Math.min(1, dx)) * 8);
+      mouseY.set(Math.max(-1, Math.min(1, dy)) * 6);
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [mouseX, mouseY]);
+
+  // 点击头发触发晕眩
+  const handleHairClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (clickState !== "none") return;
+    setClickState("dizzy");
+    setTimeout(() => setClickState("none"), 2000);
+  };
+
+  // 点击面部触发害羞
+  const handleFaceClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (clickState !== "none") return;
+    setClickState("shy");
+    setTimeout(() => setClickState("none"), 2000);
+  };
+
+  // 点击徽章/身体触发敬礼
+  const handleBadgeClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (clickState !== "none") return;
+    setClickState("salute");
+    setTimeout(() => setClickState("none"), 2500);
+  };
+
+  // 根据当前动作和点击彩蛋判定表情
+  const activeExpression = clickState === "dizzy" 
+    ? "dizzy"
+    : clickState === "shy"
+      ? "happy" 
+      : state === "celebrating"
+        ? "happy"
+        : expression;
+
+  // 嘴巴路径生成
+  const getMouthPath = () => {
+    if (state === "speaking") {
+      return "M 74 118 Q 88 126 102 118"; // 说话状态的嘴巴（由 Framer Motion 控制 speakLoop 动画）
+    }
+    if (clickState === "dizzy") {
+      return "M 80 120 Q 88 116 96 120"; // 晕眩时的扁嘴
+    }
+    switch (activeExpression) {
+      case "happy":
+        return "M 76 116 Q 88 128 100 116"; // 大笑/害羞嘴
+      case "confused":
+        return "M 82 122 Q 88 118 94 122"; // 扁嘴
+      case "thinking":
+        return "M 80 120 H 96";             // 平嘴
+      case "surprised":
+        return "M 80 122 C 80 126 96 126 96 122"; // 惊讶圆嘴
+      default:
+        return "M 78 118 Q 88 124 98 118"; // 默认微笑
+    }
+  };
+
+  const showQuestion = activeExpression === "confused" || state === "error";
+
+  // Mascot 身体动画变体
+  const bodyVariants = {
+    bounce: {
+      y: [0, -8, 0],
+      transition: { duration: 0.6, repeat: Infinity, ease: "easeInOut" }
+    },
+    shake: {
+      x: [-1.5, 1.5, -1.5, 1.5, 0],
+      transition: { duration: 0.15, repeat: Infinity }
+    },
+    float: {
+      y: [0, -5, 0],
+      transition: { duration: 3.5, repeat: Infinity, ease: "easeInOut" }
+    }
+  };
+
+  const mouthVariants = {
+    speakLoop: {
+      d: [
+        "M 78 118 Q 88 120 98 118",
+        "M 78 114 Q 88 126 98 114",
+        "M 80 117 Q 88 122 96 117",
+        "M 78 118 Q 88 120 98 118"
+      ],
+      transition: { duration: 0.8, repeat: Infinity }
+    }
+  };
 
   return (
-    <motion.svg
-      viewBox="0 0 176 200"
-      width={size}
-      height={size}
-      className={cn("overflow-visible", className)}
-      initial={animate ? { opacity: 0, y: 10 } : false}
-      animate={animate ? { opacity: 1, y: 0 } : false}
-      transition={{ duration: 0.5, ease: "easeOut" }}
+    <div 
+      ref={containerRef}
+      className={cn("relative flex flex-col items-center select-none cursor-pointer", className)} 
+      style={{ width: size, height: size }}
     >
-      <defs>
-        {/* 品牌蓝渐变 */}
-        <linearGradient id="brandBlue" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#3B9AE0" />
-          <stop offset="100%" stopColor="#1F6FBF" />
-        </linearGradient>
-        <linearGradient id="brandBlueDark" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#185FA5" />
-          <stop offset="100%" stopColor="#0F4F8C" />
-        </linearGradient>
-        <linearGradient id="visorGlass" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="rgba(91,154,224,0.25)" />
-          <stop offset="50%" stopColor="rgba(91,154,224,0.45)" />
-          <stop offset="100%" stopColor="rgba(91,154,224,0.25)" />
-        </linearGradient>
-        <linearGradient id="hairGradient" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#5B9AE0" />
-          <stop offset="100%" stopColor="#1F6FBF" />
-        </linearGradient>
-        <linearGradient id="accentGradient" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#FDBA8C" />
-          <stop offset="100%" stopColor="#F97316" />
-        </linearGradient>
-        <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="2.5" result="blur" />
-          <feComposite in="SourceGraphic" in2="blur" operator="over" />
-        </filter>
-      </defs>
+      {/* 气泡对话框 */}
+      <AnimatePresence>
+        {speakText && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 10 }}
+            className="absolute -top-16 bg-neutral-900/95 dark:bg-neutral-900/95 text-neutral-100 text-xs px-3.5 py-2 rounded-2xl shadow-xl border border-blue-500/20 z-20 max-w-[180px] text-center backdrop-blur-md"
+          >
+            <div className="relative font-medium leading-relaxed">
+              {speakText}
+              <div className="absolute -bottom-3.5 left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-neutral-900/95 border-r border-b border-blue-500/20 rotate-45" />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* 整体悬浮动画 */}
-      <motion.g
-        animate={animate ? { y: [0, -5, 0] } : {}}
-        transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+      <motion.svg
+        viewBox="0 0 176 200"
+        className="w-full h-full overflow-visible"
+        initial={animate ? { opacity: 0, y: 10 } : false}
+        animate={animate ? (state === "celebrating" || clickState === "dizzy" ? "bounce" : state === "error" ? "shake" : "float") : false}
+        variants={bodyVariants}
       >
-        {/* 背景光环 */}
+        <defs>
+          {/* 小镜蓝色渐变发色 */}
+          <linearGradient id="hairGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#60A5FA" />
+            <stop offset="50%" stopColor="#3B82F6" />
+            <stop offset="100%" stopColor="#1D4ED8" />
+          </linearGradient>
+          {/* 帅气的天蓝色双重高光瞳孔渐变 */}
+          <linearGradient id="eyePupilGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#2563EB" />
+            <stop offset="100%" stopColor="#1E3A8A" />
+          </linearGradient>
+          {/* 宇航风衣深蓝镶边 */}
+          <linearGradient id="suitBlue" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#2563EB" />
+            <stop offset="100%" stopColor="#1D4ED8" />
+          </linearGradient>
+          {/* 蔚蓝全息眼罩与光芒 */}
+          <linearGradient id="visorGlass" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="rgba(96,165,250,0.2)" />
+            <stop offset="50%" stopColor="rgba(96,165,250,0.5)" />
+            <stop offset="100%" stopColor="rgba(96,165,250,0.2)" />
+          </linearGradient>
+          {/* 背后飞扬披风渐变 */}
+          <linearGradient id="capeGradient" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#1E40AF" />
+            <stop offset="100%" stopColor="#1E3A8A" />
+          </linearGradient>
+          {/* 专注全息投影背景 */}
+          <linearGradient id="hologramGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="rgba(0, 242, 254, 0.4)" />
+            <stop offset="100%" stopColor="rgba(0, 242, 254, 0)" />
+          </linearGradient>
+          {/* 闪闪发光的小星星渐变 */}
+          <linearGradient id="starGradient" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#FDE047" />
+            <stop offset="100%" stopColor="#EAB308" />
+          </linearGradient>
+        </defs>
+
+        {/* 底部全息阴影环 */}
         {animate && (
           <motion.ellipse
             cx="88"
-            cy="180"
-            rx="56"
-            ry="8"
-            fill="rgba(31,111,191,0.12)"
-            animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.15, 0.3] }}
+            cy="182"
+            rx="46"
+            ry="7"
+            fill="rgba(37,99,235,0.15)"
+            animate={{ scale: state === "celebrating" ? [1, 0.85, 1] : [1, 1.12, 1], opacity: [0.35, 0.15, 0.35] }}
             transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
           />
         )}
 
-        {/* 披风（在身体后方） */}
-        <motion.path
-          d="M 56 92 C 44 110 38 148 48 178 C 64 184 112 184 128 178 C 138 148 132 110 120 92 Z"
-          fill="url(#brandBlueDark)"
-          animate={animate ? { d: [
-            "M 56 92 C 44 110 38 148 48 178 C 64 184 112 184 128 178 C 138 148 132 110 120 92 Z",
-            "M 56 92 C 42 112 34 150 46 180 C 64 186 112 186 130 180 C 142 150 134 112 120 92 Z",
-            "M 56 92 C 44 110 38 148 48 178 C 64 184 112 184 128 178 C 138 148 132 110 120 92 Z",
-          ]} : {}}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        {/* 全息扫描投影 (Listening/Scanning 状态下投射) */}
+        {(state === "listening" || state === "thinking") && (
+          <motion.polygon
+            points="52,86 124,86 160,200 16,200"
+            fill="url(#hologramGradient)"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0.15, 0.4, 0.15] }}
+            transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+            className="pointer-events-none"
+          />
+        )}
+
+        {/* 背后短斗篷/披风 (Cape) */}
+        <path
+          d="M 54 94 C 40 106 32 142 42 172 C 58 178 118 178 134 172 C 144 142 136 106 122 94 Z"
+          fill="url(#capeGradient)"
+          stroke="#1E3A8A"
+          strokeWidth="0.5"
         />
 
-        {/* 身体/白大褂 */}
-        <path
-          d="M 68 96 L 56 110 L 52 168 C 52 174 58 178 64 178 L 112 178 C 118 178 124 174 124 168 L 120 110 L 108 96 Z"
-          fill="#FFFFFF"
-          stroke="#E2E8F0"
-          strokeWidth="1"
-        />
-        {/* 衣领 */}
-        <path d="M 88 96 L 76 116 L 88 124 L 100 116 Z" fill="#F8FAFC" stroke="#E2E8F0" strokeWidth="1" />
-        {/* 左衣襟 */}
-        <path d="M 88 124 L 76 116 L 60 170 L 88 170 Z" fill="#F1F5F9" />
-        {/* 右衣襟 */}
-        <path d="M 88 124 L 100 116 L 116 170 L 88 170 Z" fill="#FFFFFF" />
-        {/* 胸前 Logo 徽章 */}
-        <circle cx="88" cy="134" r="10" fill="url(#brandBlue)" />
-        <text x="88" y="137.5" textAnchor="middle" fontSize="8" fill="white" fontWeight="bold">ZY</text>
-        {/* 腰带/纽扣 */}
-        <circle cx="88" cy="150" r="2.5" fill="#CBD5E1" />
-        <circle cx="88" cy="158" r="2.5" fill="#CBD5E1" />
+        {/* 宇航外套与身体 */}
+        <g>
+          {/* 主身体/躯干 */}
+          <path
+            d="M 52 110 L 124 110 C 132 132 130 162 120 176 L 56 176 C 46 162 44 132 52 110 Z"
+            fill="#FFFFFF"
+            stroke="#D1D5DB"
+            strokeWidth="1.5"
+          />
+          {/* 外套深蓝装饰线条与滚边 */}
+          <path d="M 52 110 C 60 126 62 152 56 176" fill="none" stroke="url(#suitBlue)" strokeWidth="3" />
+          <path d="M 124 110 C 116 126 114 152 120 176" fill="none" stroke="url(#suitBlue)" strokeWidth="3" />
+          
+          {/* 胸前 ZY 徽章 (带点击事件) */}
+          <g onClick={handleBadgeClick}>
+            <circle cx="88" cy="140" r="11" fill="url(#suitBlue)" className="cursor-pointer" />
+            <circle cx="88" cy="140" r="8" fill="#FFFFFF" opacity="0.15" />
+            {/* ZY 徽章字母标识 */}
+            <path
+              d="M 84 137 L 91 137 L 85 143 L 92 143 M 90 137 L 90 141 C 90 144 87 144 86 142"
+              fill="none"
+              stroke="#FFFFFF"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </g>
+          
+          {/* 风衣衣领 */}
+          <path d="M 64 110 L 88 126 L 112 110" fill="none" stroke="url(#suitBlue)" strokeWidth="2.5" />
+          {/* 小脚靴子 */}
+          <rect x="58" y="176" width="16" height="8" rx="3" fill="url(#suitBlue)" />
+          <rect x="102" y="176" width="16" height="8" rx="3" fill="url(#suitBlue)" />
+        </g>
 
-        {/* 左手臂 */}
-        <path
-          d="M 56 110 C 46 124 44 146 50 156 C 54 160 60 158 62 152"
-          fill="none"
-          stroke="#FFFFFF"
-          strokeWidth="14"
-          strokeLinecap="round"
-        />
-        <path
-          d="M 56 110 C 46 124 44 146 50 156 C 54 160 60 158 62 152"
-          fill="none"
-          stroke="#E2E8F0"
-          strokeWidth="1"
-          strokeLinecap="round"
-        />
-        {/* 右手臂 */}
-        <path
-          d="M 120 110 C 130 124 132 146 126 156 C 122 160 116 158 114 152"
-          fill="none"
-          stroke="#FFFFFF"
-          strokeWidth="14"
-          strokeLinecap="round"
-        />
-        <path
-          d="M 120 110 C 130 124 132 146 126 156 C 122 160 116 158 114 152"
-          fill="none"
-          stroke="#E2E8F0"
-          strokeWidth="1"
-          strokeLinecap="round"
-        />
-        {/* 手套/手掌 */}
-        <circle cx="50" cy="158" r="7" fill="#F8FAFC" stroke="#E2E8F0" strokeWidth="1" />
-        <circle cx="126" cy="158" r="7" fill="#F8FAFC" stroke="#E2E8F0" strokeWidth="1" />
+        {/* 头部视差容器 (头发、头盔、眼罩、面部和眼睛随光标平移动画) */}
+        <motion.g style={{ x: faceX, y: faceY }}>
+          
+          {/* 耳罩/耳机 */}
+          <circle cx="44" cy="74" r="11" fill="url(#suitBlue)" stroke="#FFFFFF" strokeWidth="1.5" />
+          <circle cx="44" cy="74" r="7" fill="#FFFFFF" opacity="0.3" />
+          <circle cx="132" cy="74" r="11" fill="url(#suitBlue)" stroke="#FFFFFF" strokeWidth="1.5" />
+          <circle cx="132" cy="74" r="7" fill="#FFFFFF" opacity="0.3" />
 
-        {/* 头部 */}
-        <ellipse cx="88" cy="72" rx="44" ry="40" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1" />
+          {/* 白色主头盔 (带点击事件) */}
+          <ellipse 
+            cx="88" 
+            cy="74" 
+            rx="44" 
+            ry="40" 
+            fill="#FFFFFF" 
+            stroke="#E2E8F0" 
+            strokeWidth="1.5" 
+            onClick={handleFaceClick}
+            className="cursor-pointer"
+          />
 
-        {/* 耳机 */}
-        <path
-          d="M 44 72 C 44 48 60 32 88 32 C 116 32 132 48 132 72"
-          fill="none"
-          stroke="#1F6FBF"
-          strokeWidth="5"
-          strokeLinecap="round"
-        />
-        <rect x="38" y="60" width="12" height="24" rx="6" fill="url(#brandBlue)" />
-        <rect x="126" y="60" width="12" height="24" rx="6" fill="url(#brandBlue)" />
-        {/* 耳机脉冲光环 */}
-        {animate && (
+          {/* 帅气的蓝色渐变浪花发束 (带眩晕彩蛋触发) */}
+          <motion.g style={{ x: hairX, y: hairY }} onClick={handleHairClick} className="cursor-pointer">
+            {/* 浪花发片底 */}
+            <path
+              d="M 50 50 C 54 34 72 26 88 26 C 104 26 122 34 126 50 C 118 42 104 38 88 38 C 72 38 58 42 50 50 Z"
+              fill="url(#hairGradient)"
+            />
+            {/* 发梢1 (左翘) */}
+            <path d="M 68 34 Q 74 16 82 30" fill="none" stroke="url(#hairGradient)" strokeWidth="4" strokeLinecap="round" />
+            {/* 发梢2 (中翘) */}
+            <path d="M 88 30 Q 92 10 98 28" fill="none" stroke="url(#hairGradient)" strokeWidth="5" strokeLinecap="round" />
+            {/* 发梢3 (右翘) */}
+            <path d="M 106 34 Q 114 18 118 32" fill="none" stroke="url(#hairGradient)" strokeWidth="4" strokeLinecap="round" />
+          </motion.g>
+
+          {/* 脸部红润小腮红 */}
+          <ellipse cx="58" cy="80" rx="6" ry="4" fill="#F87171" opacity={clickState === "shy" ? 0.6 : 0.15} />
+          <ellipse cx="118" cy="80" rx="6" ry="4" fill="#F87171" opacity={clickState === "shy" ? 0.6 : 0.15} />
+
+          {/* 亮蓝色半透明全息眼罩 (Visor) */}
+          <motion.path
+            d="M 48 66 C 48 54 60 52 88 52 C 116 52 128 54 128 66 C 128 80 116 86 88 86 C 60 86 48 80 48 66 Z"
+            fill="url(#visorGlass)"
+            stroke="#93C5FD"
+            strokeWidth="1.5"
+            style={{ x: visorX, y: visorY }}
+          />
+
+          {/* 眼部状态机 (双重高光大眼睛) */}
+          <motion.g style={{ x: eyeX, y: eyeY }}>
+            {clickState === "dizzy" ? (
+              // 1. 眩晕状态 (X X 眼)
+              <>
+                <g transform="translate(68, 70)">
+                  <line x1="-5" y1="-5" x2="5" y2="5" stroke="#1D4ED8" strokeWidth="2.5" strokeLinecap="round" />
+                  <line x1="5" y1="-5" x2="-5" y2="5" stroke="#1D4ED8" strokeWidth="2.5" strokeLinecap="round" />
+                </g>
+                <g transform="translate(108, 70)">
+                  <line x1="-5" y1="-5" x2="5" y2="5" stroke="#1D4ED8" strokeWidth="2.5" strokeLinecap="round" />
+                  <line x1="5" y1="-5" x2="-5" y2="5" stroke="#1D4ED8" strokeWidth="2.5" strokeLinecap="round" />
+                </g>
+              </>
+            ) : blink ? (
+              // 2. 眨眼状态 (微笑闭眼线)
+              <>
+                <path d="M 60 72 Q 68 76 76 72" fill="none" stroke="#1D4ED8" strokeWidth="3" strokeLinecap="round" />
+                <path d="M 100 72 Q 108 76 116 72" fill="none" stroke="#1D4ED8" strokeWidth="3" strokeLinecap="round" />
+              </>
+            ) : activeExpression === "happy" || state === "celebrating" ? (
+              // 3. 开心/庆祝/害羞眯眼笑 (> < 弯月牙眼)
+              <>
+                <path d="M 60 74 Q 68 64 76 74" fill="none" stroke="#10B981" strokeWidth="3.5" strokeLinecap="round" />
+                <path d="M 100 74 Q 108 64 116 74" fill="none" stroke="#10B981" strokeWidth="3.5" strokeLinecap="round" />
+              </>
+            ) : state === "listening" || activeExpression === "surprised" ? (
+              // 4. 专注/扫描眼 (微缩蔚蓝雷达同心圆 ⊙ ⊙)
+              <>
+                <circle cx="68" cy="70" r="7" fill="none" stroke="#00F2FE" strokeWidth="2" />
+                <circle cx="68" cy="70" r="2.5" fill="#00F2FE" />
+                <circle cx="108" cy="70" r="7" fill="none" stroke="#00F2FE" strokeWidth="2" />
+                <circle cx="108" cy="70" r="2.5" fill="#00F2FE" />
+              </>
+            ) : activeExpression === "confused" || state === "error" ? (
+              // 5. 困惑/错误大圆眼
+              <>
+                <circle cx="68" cy="70" r="8" fill="#FEE2E2" stroke="#EF4444" strokeWidth="2.5" />
+                <circle cx="68" cy="70" r="3" fill="#EF4444" />
+                <circle cx="108" cy="70" r="8" fill="#FEE2E2" stroke="#EF4444" strokeWidth="2.5" />
+                <circle cx="108" cy="70" r="3" fill="#EF4444" />
+              </>
+            ) : (
+              // 6. 默认/闲置 (水汪汪的萌系大眼睛 ⊙_⊙)
+              <>
+                {/* 左眼 */}
+                <ellipse cx="68" cy="70" rx="9" ry="11" fill="#0F172A" />
+                <ellipse cx="68" cy="71" rx="6.5" ry="8.5" fill="url(#eyePupilGradient)" />
+                <circle cx="65.5" cy="66.5" r="3" fill="#FFFFFF" /> {/* 大高光 */}
+                <circle cx="70.5" cy="73.5" r="1.2" fill="#FFFFFF" /> {/* 小高光 */}
+
+                {/* 右眼 */}
+                <ellipse cx="108" cy="70" rx="9" ry="11" fill="#0F172A" />
+                <ellipse cx="108" cy="71" rx="6.5" ry="8.5" fill="url(#eyePupilGradient)" />
+                <circle cx="105.5" cy="66.5" r="3" fill="#FFFFFF" /> {/* 大高光 */}
+                <circle cx="110.5" cy="73.5" r="1.2" fill="#FFFFFF" /> {/* 小高光 */}
+              </>
+            )}
+          </motion.g>
+
+          {/* 嘴巴 (联动打字说话与各种表情) */}
+          {state === "speaking" && animate ? (
+            <motion.path
+              d="M 78 118 Q 88 124 98 118"
+              fill="none"
+              stroke="#1D4ED8"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              variants={mouthVariants}
+              animate="speakLoop"
+            />
+          ) : (
+            <path d={getMouthPath()} fill="none" stroke="#1D4ED8" strokeWidth="2.5" strokeLinecap="round" />
+          )}
+
+        </motion.g>
+
+        {/* 趣味手部姿势与配饰 */}
+        {clickState === "shy" ? (
+          // 害羞动作：双手捂眼睛/脸颊
           <>
-            <motion.ellipse
-              cx="44"
-              cy="72"
-              rx="12"
-              ry="18"
-              fill="none"
-              stroke="#5B9AE0"
-              strokeWidth="1.5"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: [0, 0.5, 0], scale: [0.8, 1.3, 1.5] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-            />
-            <motion.ellipse
-              cx="132"
-              cy="72"
-              rx="12"
-              ry="18"
-              fill="none"
-              stroke="#5B9AE0"
-              strokeWidth="1.5"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: [0, 0.5, 0], scale: [0.8, 1.3, 1.5] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeOut", delay: 0.3 }}
-            />
+            <motion.circle cx="60" cy="84" r="6.5" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1" animate={{ x: [-2, 2, -2] }} transition={{ repeat: Infinity, duration: 1.5 }} />
+            <motion.circle cx="116" cy="84" r="6.5" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1" animate={{ x: [2, -2, 2] }} transition={{ repeat: Infinity, duration: 1.5 }} />
+          </>
+        ) : clickState === "salute" ? (
+          // 敬礼动作：左手插腰，右手抬起贴在额头旁
+          <>
+            {/* 左手插腰 */}
+            <path d="M 50 158 C 42 152 42 168 50 162" fill="none" stroke="url(#suitBlue)" strokeWidth="3.5" strokeLinecap="round" />
+            <circle cx="48" cy="160" r="5" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1" />
+            {/* 右手敬礼臂与手 */}
+            <path d="M 126 150 C 138 132 142 108 128 88" fill="none" stroke="url(#suitBlue)" strokeWidth="3.5" strokeLinecap="round" />
+            <circle cx="128" cy="88" r="6.5" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1" />
+            {/* 敬礼投射出全息 ZY 圆环标志 */}
+            <motion.g
+              initial={{ scale: 0.1, opacity: 0 }}
+              animate={{ scale: [1, 1.1, 1], opacity: 0.9 }}
+              transition={{ duration: 1.8, repeat: Infinity }}
+              style={{ transformOrigin: "88px 105px" }}
+            >
+              <ellipse cx="88" cy="105" rx="30" ry="12" fill="none" stroke="#38BDF8" strokeWidth="1.5" strokeDasharray="3 3" />
+              <text x="88" y="109" fontSize="9" fill="#38BDF8" fontWeight="bold" textAnchor="middle" opacity="0.8">ZY AI</text>
+            </motion.g>
+          </>
+        ) : pose === "holding-resume" ? (
+          // 简历手执动作
+          <>
+            <circle cx="50" cy="158" r="6.5" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1" />
+            {/* 简历模型纸片 */}
+            <g>
+              <rect x="110" y="112" width="34" height="46" rx="3" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.2" transform="rotate(15 120 135)" />
+              {/* 微缩头像与正文线 */}
+              <rect x="115" y="118" width="8" height="8" rx="1.5" fill="url(#suitBlue)" transform="rotate(15 120 135)" />
+              <line x1="126" y1="120" x2="136" y2="120" stroke="#E2E8F0" strokeWidth="2" transform="rotate(15 120 135)" />
+              <line x1="126" y1="125" x2="138" y2="125" stroke="#E2E8F0" strokeWidth="2" transform="rotate(15 120 135)" />
+              <line x1="116" y1="133" x2="138" y2="133" stroke="#F1F5F9" strokeWidth="2.2" transform="rotate(15 120 135)" />
+              <line x1="116" y1="139" x2="134" y2="139" stroke="#F1F5F9" strokeWidth="2.2" transform="rotate(15 120 135)" />
+              {/* 小手抓着纸片 */}
+              <circle cx="116" cy="144" r="6.5" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1" />
+            </g>
+          </>
+        ) : pose === "waving" ? (
+          // 挥手动作
+          <>
+            <circle cx="50" cy="158" r="6.5" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1" />
+            <motion.g
+              animate={animate ? { rotate: [0, -16, 0, -16, 0] } : {}}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              style={{ transformOrigin: "126px 146px" }}
+            >
+              <path d="M 126 158 C 138 142 144 126 138 116" fill="none" stroke="url(#suitBlue)" strokeWidth="3.5" strokeLinecap="round" />
+              <circle cx="138" cy="114" r="6.5" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1" />
+            </motion.g>
+          </>
+        ) : state === "celebrating" ? (
+          // 开心举起双手
+          <>
+            <motion.circle cx="42" cy="132" r="6.5" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1" animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.8 }} />
+            <motion.circle cx="134" cy="132" r="6.5" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1" animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.8, delay: 0.2 }} />
+          </>
+        ) : (
+          // 默认双手垂在身侧
+          <>
+            <circle cx="50" cy="158" r="6.5" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1" />
+            <circle cx="126" cy="158" r="6.5" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1" />
           </>
         )}
 
-        {/* 蓝色头发 */}
-        <path
-          d="M 52 52 C 56 36 72 28 88 28 C 104 28 120 36 124 52 C 116 44 104 40 88 40 C 72 40 60 44 52 52 Z"
-          fill="url(#hairGradient)"
-        />
-        <path
-          d="M 70 34 L 76 18 L 84 32 Z"
-          fill="url(#hairGradient)"
-        />
-        <path
-          d="M 88 30 L 92 14 L 100 32 Z"
-          fill="url(#hairGradient)"
-        />
-        <path
-          d="M 106 34 L 116 20 L 120 36 Z"
-          fill="url(#hairGradient)"
-        />
-
-        {/* 护目镜 */}
-        <path
-          d="M 50 64 C 50 52 62 50 88 50 C 114 50 126 52 126 64 C 126 78 114 84 88 84 C 62 84 50 78 50 64 Z"
-          fill="url(#visorGlass)"
-          stroke="#5B9AE0"
-          strokeWidth="2"
-        />
-        {/* 护目镜高光扫描 */}
-        {animate && (
-          <motion.path
-            d="M 54 64 L 122 64"
-            stroke="rgba(255,255,255,0.6)"
-            strokeWidth="2"
-            strokeLinecap="round"
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: [0, 1, 1], opacity: [0, 1, 0] }}
-            transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-          />
-        )}
-
-        {/* 眼睛 */}
-        <motion.g
-          animate={animate ? { scaleY: [1, eyeScaleY, 1, eyeScaleY, 1] } : {}}
-          transition={{ duration: 4, repeat: Infinity, times: [0, 0.05, 0.1, 0.15, 1] }}
-          style={{ transformOrigin: "88px 72px" }}
-        >
-          <ellipse cx="72" cy="72" rx="8" ry="10" fill="#0F4F8C" />
-          <ellipse cx="104" cy="72" rx="8" ry="10" fill="#0F4F8C" />
-          <circle cx="74" cy="70" r="3" fill="white" />
-          <circle cx="106" cy="70" r="3" fill="white" />
-        </motion.g>
-
-        {/* 嘴巴 */}
-        <path d={mouthPath} fill="none" stroke="#0F4F8C" strokeWidth="2" strokeLinecap="round" />
-
-        {/* 思考/疑惑汗滴 */}
-        {showTeardrop && (
-          <motion.path
-            d="M 124 48 Q 128 42 128 50 Q 128 56 124 48"
-            fill="#5B9AE0"
-            animate={animate ? { y: [0, 2, 0], opacity: [1, 0.6, 1] } : {}}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          />
-        )}
-        {showQuestion && (
-          <motion.text
-            x="132"
-            y="44"
-            fontSize="14"
-            fill="#F97316"
-            fontWeight="bold"
-            animate={animate ? { y: [0, -3, 0] } : {}}
-            transition={{ duration: 1.2, repeat: Infinity }}
-          >
-            ?
-          </motion.text>
-        )}
-
-        {/* 手持物：简历/平板 */}
-        {(pose === "holding-resume" || pose === "holding-tablet") && (
+        {/* 专注全息浮空控制台 (Listening/Scanning 状态下浮现) */}
+        {(state === "listening" || state === "thinking") && (
           <motion.g
-            initial={{ opacity: 0, rotate: -5 }}
-            animate={{ opacity: 1, rotate: [0, 2, -2, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            style={{ transformOrigin: "88px 140px" }}
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 0.85, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            <rect
-              x="64"
-              y="126"
-              width="48"
-              height="64"
-              rx="5"
-              fill="white"
-              stroke="#CBD5E1"
-              strokeWidth="1"
-              transform="rotate(-8 88 158)"
-            />
-            <rect
-              x="68"
-              y="132"
-              width="14"
-              height="14"
-              rx="3"
-              fill="url(#brandBlue)"
-              transform="rotate(-8 88 158)"
-            />
-            <rect
-              x="86"
-              y="134"
-              width="20"
-              height="3"
-              rx="1.5"
-              fill="#E2E8F0"
-              transform="rotate(-8 88 158)"
-            />
-            <rect
-              x="86"
-              y="142"
-              width="16"
-              height="3"
-              rx="1.5"
-              fill="#E2E8F0"
-              transform="rotate(-8 88 158)"
-            />
-            <rect
-              x="70"
-              y="154"
-              width="32"
-              height="3"
-              rx="1.5"
-              fill="#F1F5F9"
-              transform="rotate(-8 88 158)"
-            />
-            <rect
-              x="70"
-              y="162"
-              width="28"
-              height="3"
-              rx="1.5"
-              fill="#F1F5F9"
-              transform="rotate(-8 88 158)"
-            />
-            {/* 小星星装饰 */}
-            <motion.path
-              d="M 120 128 L 122 134 L 128 136 L 122 138 L 120 144 L 118 138 L 112 136 L 118 134 Z"
-              fill="url(#accentGradient)"
-              animate={animate ? { scale: [1, 1.2, 1], rotate: [0, 15, 0] } : {}}
-              transition={{ duration: 2, repeat: Infinity }}
-              style={{ transformOrigin: "120px 136px" }}
-            />
+            {/* 科技发光面板底 */}
+            <rect x="52" y="152" width="72" height="18" rx="4" fill="rgba(0, 242, 254, 0.12)" stroke="#00f2fe" strokeWidth="1.2" />
+            {/* 闪烁的像素网格小按键 */}
+            <circle cx="60" cy="161" r="1.5" fill="#00f2fe" />
+            <circle cx="68" cy="161" r="1.5" fill="#00f2fe" />
+            <circle cx="76" cy="161" r="1.5" fill="#00f2fe" />
+            <rect x="83" y="160" width="8" height="2" fill="#00f2fe" />
+            <rect x="95" y="158" width="12" height="6" rx="1.5" fill="none" stroke="#00f2fe" strokeWidth="0.8" />
+            {/* 全息向上飘动的浮点粒子 */}
+            <motion.circle cx="64" cy="148" r="1" fill="#00f2fe" animate={{ y: [0, -10], opacity: [1, 0] }} transition={{ repeat: Infinity, duration: 1.5 }} />
+            <motion.circle cx="108" cy="150" r="1" fill="#00f2fe" animate={{ y: [0, -12], opacity: [1, 0] }} transition={{ repeat: Infinity, duration: 1.8, delay: 0.4 }} />
           </motion.g>
         )}
 
-        {/* 404 姿势：手持放大镜 */}
-        {pose === "404" && (
-          <motion.g
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            <circle
-              cx="52"
-              cy="146"
-              r="16"
+        {/* 眩晕小星星粒子 (dizzy 状态下在头顶旋转) */}
+        {clickState === "dizzy" && (
+          <g>
+            <motion.path
+              d="M 68 18 A 6 6 0 1 1 108 18"
               fill="none"
-              stroke="#1F6FBF"
-              strokeWidth="3"
+              stroke="#FDE047"
+              strokeWidth="1"
+              strokeDasharray="2 2"
             />
-            <line
-              x1="40"
-              y1="162"
-              x2="48"
-              y2="156"
-              stroke="#1F6FBF"
-              strokeWidth="3"
-              strokeLinecap="round"
+            {/* 旋转星1 */}
+            <motion.g
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1.8, repeat: Infinity, ease: "linear" }}
+              style={{ transformOrigin: "88px 24px" }}
+            >
+              <polygon points="88,14 89,17 92,18 89,19 88,22 87,19 84,18 87,17" fill="url(#starGradient)" />
+            </motion.g>
+            {/* 旋转星2 */}
+            <motion.g
+              animate={{ rotate: -360 }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: "linear" }}
+              style={{ transformOrigin: "88px 24px" }}
+            >
+              <polygon points="104,18 105,21 108,22 105,23 104,26 103,23 100,22 103,21" fill="url(#starGradient)" />
+            </motion.g>
+          </g>
+        )}
+
+        {/* 害羞红心粒子 (shy 状态下从身体两侧冒出飘动) */}
+        {clickState === "shy" && (
+          <g>
+            <motion.path
+              d="M 32 100 C 28 92 18 92 18 100 C 18 108 32 120 32 120 C 32 120 46 108 46 100 C 46 92 36 92 32 100 Z"
+              fill="#F43F5E"
+              initial={{ scale: 0.1, opacity: 0, y: 20 }}
+              animate={{ scale: [0.1, 1, 0.8], opacity: [0, 0.9, 0], x: [-5, -15], y: [-10, -45] }}
+              transition={{ duration: 1.6 }}
             />
-            {/* 放大镜扫描线 */}
-            {animate && (
-              <motion.circle
-                cx="52"
-                cy="146"
-                r="10"
-                fill="none"
-                stroke="#5B9AE0"
-                strokeWidth="1.5"
-                strokeDasharray="4 4"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                style={{ transformOrigin: "52px 146px" }}
-              />
+            <motion.path
+              d="M 144 100 C 140 92 130 92 130 100 C 130 108 144 120 144 120 C 144 120 158 108 158 100 C 158 92 148 92 144 100 Z"
+              fill="#F43F5E"
+              initial={{ scale: 0.1, opacity: 0, y: 20 }}
+              animate={{ scale: [0.1, 1, 0.8], opacity: [0, 0.9, 0], x: [5, 15], y: [-10, -45] }}
+              transition={{ duration: 1.6, delay: 0.2 }}
+            />
+          </g>
+        )}
+
+        {/* 惊讶/困惑符号 (Show Question Mark & Exclamation indicator) */}
+        {(showQuestion || clickState === "dizzy") && (
+          <motion.g
+            initial={{ opacity: 0, scale: 0.4 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: "spring", stiffness: 200, damping: 10 }}
+          >
+            {/* 叹号 ! */}
+            <rect x="144" y="44" width="3.5" height="12" rx="1.7" fill="#EF4444" />
+            <circle cx="145.7" cy="61" r="2" fill="#EF4444" />
+            {/* 疑问符 ? */}
+            {showQuestion && (
+              <text x="30" y="58" fontSize="16" fill="#F59E0B" fontWeight="bold">?</text>
             )}
           </motion.g>
         )}
-
-        {/* 挥手姿势 */}
-        {pose === "waving" && (
-          <motion.g
-            animate={animate ? { rotate: [0, -12, 0, -8, 0] } : {}}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-            style={{ transformOrigin: "120px 110px" }}
-          >
-            <circle cx="126" cy="106" r="8" fill="#F8FAFC" stroke="#E2E8F0" strokeWidth="1" />
-            <path
-              d="M 116 100 L 122 94 M 120 104 L 128 96 M 124 108 L 134 102"
-              stroke="#1F6FBF"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </motion.g>
-        )}
-      </motion.g>
-    </motion.svg>
+      </motion.svg>
+    </div>
   );
 }
 
-// 便捷变体导出
+// 辅助包装组件导出，用于兼容现有模块调用
 export function XiaojingUploadMascot(props: Omit<XiaojingMascotProps, "pose" | "expression">) {
   return <XiaojingMascot {...props} pose="holding-resume" expression="smile" />;
 }

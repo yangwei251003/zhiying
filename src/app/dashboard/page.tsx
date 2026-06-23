@@ -13,7 +13,6 @@ import {
   Share2,
   Settings,
   Plus,
-  ArrowRight,
   Edit,
   Copy,
   Trash2,
