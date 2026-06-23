@@ -131,11 +131,17 @@ export default function MatchResultPage() {
                 <p className="text-sm text-neutral-500">{result.company}</p>
               </div>
               <div className="flex items-center gap-3">
-                <div className="text-right">
+                <div className="text-right print:hidden">
                   <p className="text-xs text-neutral-400">投递建议</p>
                   <Badge variant={recommendationColors[result.recommendation]} size="lg">
                     {result.recommendation}
                   </Badge>
+                </div>
+                <div className="print:hidden border-l border-neutral-100 pl-3">
+                  <Button variant="outline" size="sm" onClick={() => window.print()}>
+                    <FileDown className="h-4 w-4 mr-1.5" />
+                    导出报告(PDF)
+                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -144,7 +150,7 @@ export default function MatchResultPage() {
 
         {/* 三分组匹配 */}
         <div>
-          <h2 className="text-base font-bold text-white mb-3 px-1">
+          <h2 className="text-base font-bold text-neutral-800 dark:text-white mb-3 px-1 print:text-black">
             三分组匹配结果
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -156,7 +162,7 @@ export default function MatchResultPage() {
             >
               <Card className="h-full glass-card border-primary-500/20 text-white border-beam-hover">
                 <CardHeader className="pb-3 border-b border-white/5 bg-white/5">
-                  <CardTitle className="flex items-center gap-2 text-sm text-white">
+                  <CardTitle className="flex items-center gap-2 text-sm text-white print:text-black">
                     <CheckCircle2 className="h-4 w-4 text-primary-400" />
                     直接匹配 · {result.direct_matches.length} 项
                   </CardTitle>
@@ -164,9 +170,9 @@ export default function MatchResultPage() {
                 <CardContent className="space-y-3 pt-3">
                   {result.direct_matches.map((m, i) => (
                     <div key={i} className="text-xs">
-                      <p className="text-neutral-200 font-medium">{m.item}</p>
-                      <p className="text-neutral-400 mt-0.5">
-                        依据：<code className="text-[10px] bg-white/5 text-neutral-300 px-1 py-0.5 rounded">{m.evidence}</code>
+                      <p className="text-neutral-200 print:text-black font-medium">{m.item}</p>
+                      <p className="text-neutral-400 print:text-neutral-600 mt-0.5">
+                        依据：<code className="text-[10px] bg-white/5 print:bg-neutral-100 text-neutral-300 print:text-neutral-700 px-1 py-0.5 rounded">{m.evidence}</code>
                       </p>
                     </div>
                   ))}
@@ -185,7 +191,7 @@ export default function MatchResultPage() {
             >
               <Card className="h-full glass-card border-accent-500/20 text-white border-beam-hover">
                 <CardHeader className="pb-3 border-b border-white/5 bg-white/5">
-                  <CardTitle className="flex items-center gap-2 text-sm text-white">
+                  <CardTitle className="flex items-center gap-2 text-sm text-white print:text-black">
                     <Link2 className="h-4 w-4 text-accent-400" />
                     可强调关联 · {result.associations.length} 项
                   </CardTitle>
@@ -193,11 +199,11 @@ export default function MatchResultPage() {
                 <CardContent className="space-y-3 pt-3">
                   {result.associations.map((a, i) => (
                     <div key={i} className="text-xs">
-                      <p className="text-neutral-200 font-medium">{a.item}</p>
+                      <p className="text-neutral-200 print:text-black font-medium">{a.item}</p>
                       <p className="text-accent-400 mt-0.5">
                         → 换角度为：<span className="font-semibold">{a.rephrasing_as}</span>
                       </p>
-                      <p className="text-neutral-400 mt-1 text-[11px] leading-relaxed">
+                      <p className="text-neutral-400 print:text-neutral-600 mt-1 text-[11px] leading-relaxed">
                         {a.how_to_bridge}
                       </p>
                     </div>
@@ -217,7 +223,7 @@ export default function MatchResultPage() {
             >
               <Card className="h-full glass-card border-amber-500/20 text-white border-beam-hover">
                 <CardHeader className="pb-3 border-b border-white/5 bg-white/5">
-                  <CardTitle className="flex items-center gap-2 text-sm text-white">
+                  <CardTitle className="flex items-center gap-2 text-sm text-white print:text-black">
                     <AlertTriangle className="h-4 w-4 text-amber-400" />
                     待补强项 · {result.gaps.length} 项
                   </CardTitle>
@@ -225,11 +231,11 @@ export default function MatchResultPage() {
                 <CardContent className="space-y-3 pt-3">
                   {result.gaps.map((g, i) => (
                     <div key={i} className="text-xs">
-                      <p className="text-neutral-200 font-medium">{g.skill}</p>
-                      <p className="text-neutral-400 mt-0.5">
+                      <p className="text-neutral-200 print:text-black font-medium">{g.skill}</p>
+                      <p className="text-neutral-400 print:text-neutral-600 mt-0.5">
                         当前：<span className="text-amber-400">{g.level}</span>
                       </p>
-                      <p className="text-neutral-400 mt-0.5 text-[11px]">{g.reason}</p>
+                      <p className="text-neutral-400 print:text-neutral-600 mt-0.5 text-[11px]">{g.reason}</p>
                     </div>
                   ))}
                   <div className="pt-2 mt-2 border-t border-white/5">
@@ -277,7 +283,7 @@ export default function MatchResultPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="flex flex-col sm:flex-row gap-3"
+          className="flex flex-col sm:flex-row gap-3 print:hidden"
         >
           <Button
             variant="outline"

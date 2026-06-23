@@ -199,7 +199,7 @@ export default function ResumePreviewPage() {
     <div className="min-h-[calc(100vh-4rem)] bg-neutral-100">
       <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] min-h-[calc(100vh-4rem)]">
         {/* 左侧编辑面板 */}
-        <aside className="border-r border-neutral-200 bg-white flex flex-col">
+        <aside className="border-r border-neutral-200 bg-white flex flex-col print:hidden">
           <div className="p-4 border-b border-neutral-200">
             <h2 className="text-sm font-semibold text-neutral-900 mb-3">编辑面板</h2>
             <div className="flex gap-1 bg-neutral-100 p-1 rounded-md">
@@ -299,7 +299,7 @@ export default function ResumePreviewPage() {
         <main className="overflow-y-auto bg-neutral-200 p-4 md:p-8">
           <div className="max-w-[800px] mx-auto">
             {/* 状态条 */}
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4 print:hidden">
               <div className="flex items-center gap-2">
                 <Badge variant="success">
                   <CheckCircle2 className="h-3 w-3" />
@@ -348,7 +348,7 @@ export default function ResumePreviewPage() {
             {/* 动态自适应缩放视口容器 */}
             <div 
               ref={containerRef} 
-              className="w-full relative flex items-start justify-center overflow-hidden"
+              className="w-full relative flex items-start justify-center overflow-hidden resume-print-container"
               style={{ height: `${1130 * scale}px` }}
             >
               {/* A4 纸张预览 */}
@@ -356,7 +356,7 @@ export default function ResumePreviewPage() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="bg-white shadow-lg flex-shrink-0"
+                className="bg-white shadow-lg flex-shrink-0 resume-print-canvas print:shadow-none"
                 style={{
                   width: "800px",
                   height: "1130px",
@@ -488,7 +488,7 @@ export default function ResumePreviewPage() {
           </div>
 
             {/* 底部说明 */}
-            <div className="mt-6 flex items-center justify-between text-xs">
+            <div className="mt-6 flex items-center justify-between text-xs print:hidden">
               <Link href={`/match/${matchId}/result`} className="text-neutral-500 hover:text-primary-600 flex items-center gap-1">
                 <ArrowLeft className="h-3 w-3" />
                 返回匹配结果

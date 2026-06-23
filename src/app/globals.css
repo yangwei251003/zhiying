@@ -368,3 +368,31 @@
   backdrop-filter: blur(12px);
 }
 
+/* ===== 打印导出优化 ===== */
+@media print {
+  body {
+    background-color: white !important;
+    color: black !important;
+  }
+  
+  /* 强制简历画布为 100% 比例，不进行缩放 */
+  .resume-print-canvas {
+    transform: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    width: 800px !important;
+    height: 1130px !important;
+  }
+  
+  /* 取消缩放容器的高度限制 */
+  .resume-print-container {
+    height: auto !important;
+    display: block !important;
+    overflow: visible !important;
+  }
+
+  /* 消除背景图案干扰 */
+  .shimmer-grid, .aurora-bg {
+    display: none !important;
+  }
+}
