@@ -47,7 +47,7 @@ export function Navbar() {
           ? "bg-[#040E1E]/90 backdrop-blur-xl border-b border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.3)]"
           : isOnDarkHero
           ? "bg-transparent border-b border-transparent"
-          : "bg-white/95 backdrop-blur-md border-b border-neutral-200 shadow-sm"
+          : "bg-white/70 backdrop-blur-lg border-b border-neutral-200/50 shadow-[0_2px_8px_rgba(0,0,0,0.01)]"
       )}
     >
       <div className="container-page mx-auto flex h-16 items-center justify-between px-4 md:px-8">

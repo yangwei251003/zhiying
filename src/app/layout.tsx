@@ -72,6 +72,7 @@ export default function RootLayout({
             <div className="mesh-blob mesh-blob-1" />
             <div className="mesh-blob mesh-blob-2" />
             <div className="mesh-blob mesh-blob-3" />
+            <div className="mesh-blob mesh-blob-4" />
             <div className="noise-overlay" />
             <div className="shimmer-grid !opacity-20" />
           </div>

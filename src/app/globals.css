@@ -154,7 +154,7 @@
     box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.5) !important;
   }
 
-  /* 3D 微光网格背景 */
+  /* 3D 微光网格背景 (升级为高质感极简点状网格) */
   .shimmer-grid {
     position: fixed;
     top: 0;
@@ -163,14 +163,12 @@
     height: 100vh;
     z-index: -1;
     pointer-events: none;
-    background-image: 
-      linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-    background-size: 60px 60px;
+    background-image: radial-gradient(rgba(15, 23, 42, 0.08) 1.2px, transparent 1.2px);
+    background-size: 28px 28px;
     background-position: center;
-    mask-image: radial-gradient(circle at center, black 20%, transparent 80%);
-    -webkit-mask-image: radial-gradient(circle at center, black 20%, transparent 80%);
-    opacity: 0.8;
+    mask-image: radial-gradient(circle at center, black 30%, transparent 95%);
+    -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 95%);
+    opacity: 0.85;
   }
 
   /* 磨砂玻璃卡片（深色背景区使用）*/
@@ -242,7 +240,7 @@
     width: 100vw;
     height: 100vh;
     z-index: -2;
-    background-color: #FAFAFC;
+    background-color: #F8F9FC;
     overflow: hidden;
     pointer-events: none;
   }
@@ -250,41 +248,65 @@
   .mesh-blob {
     position: absolute;
     border-radius: 50%;
-    filter: blur(100px);
-    opacity: 0.4;
+    filter: blur(140px);
+    opacity: 0.35;
     mix-blend-mode: multiply;
-    animation: meshFloat 25s infinite alternate ease-in-out;
   }
 
   .mesh-blob-1 {
-    width: 800px;
-    height: 800px;
-    background: radial-gradient(circle, rgba(133, 183, 235, 0.6) 0%, transparent 70%);
-    top: -15%;
+    width: 900px;
+    height: 900px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.25) 0%, transparent 70%); /* 蓝紫色 */
+    top: -20%;
     left: -15%;
+    animation: meshFloat1 28s infinite alternate ease-in-out;
   }
 
   .mesh-blob-2 {
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(253, 186, 140, 0.5) 0%, transparent 70%);
-    bottom: -10%;
-    right: -5%;
-    animation-delay: -7s;
+    width: 750px;
+    height: 750px;
+    background: radial-gradient(circle, rgba(236, 72, 153, 0.2) 0%, transparent 70%); /* 桃粉色 */
+    bottom: -15%;
+    right: -10%;
+    animation: meshFloat2 24s infinite alternate ease-in-out;
   }
 
   .mesh-blob-3 {
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(55, 138, 221, 0.3) 0%, transparent 70%);
-    top: 30%;
-    left: 40%;
-    animation-delay: -12s;
+    width: 650px;
+    height: 650px;
+    background: radial-gradient(circle, rgba(14, 165, 233, 0.22) 0%, transparent 70%); /* 天蓝色 */
+    top: 25%;
+    left: 35%;
+    animation: meshFloat3 32s infinite alternate ease-in-out;
   }
 
-  @keyframes meshFloat {
+  .mesh-blob-4 {
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(249, 115, 22, 0.15) 0%, transparent 70%); /* 金橘色 */
+    bottom: 30%;
+    left: -5%;
+    animation: meshFloat4 26s infinite alternate ease-in-out;
+  }
+
+  @keyframes meshFloat1 {
     0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-    100% { transform: translate(120px, 90px) scale(1.1) rotate(10deg); }
+    100% { transform: translate(140px, 80px) scale(1.15) rotate(15deg); }
+  }
+
+  @keyframes meshFloat2 {
+    0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+    100% { transform: translate(-120px, -90px) scale(1.1) rotate(-15deg); }
+  }
+
+  @keyframes meshFloat3 {
+    0% { transform: translate(0, 0) scale(1.05) rotate(0deg); }
+    100% { transform: translate(90px, -110px) scale(0.9) rotate(20deg); }
+  }
+
+  @keyframes meshFloat4 {
+    0% { transform: translate(0, 0) scale(0.95) rotate(0deg); }
+    100% { transform: translate(-80px, 120px) scale(1.1) rotate(-25deg); }
   }
 
   .aurora-glow {
