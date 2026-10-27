@@ -1,0 +1,51 @@
+name: Optional Vercel backend deployment
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+  ZHIPU_BASE_URL: ${{ vars.ZHIPU_BASE_URL }}
+  ZHIPU_MODEL: ${{ vars.ZHIPU_MODEL }}
+
+jobs:
+  deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' && vars.ENABLE_VERCEL_DEPLOY == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check explicitly configured deployment
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
+        shell: bash
+        run: |
+          for name in VERCEL_ORG_ID VERCEL_PROJECT_ID VERCEL_TOKEN ZHIPU_API_KEY ZHIPU_BASE_URL ZHIPU_MODEL; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name must be configured before enabling this optional deployment."
+              exit 1
+            fi
+          done
+
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Deploy to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
+        shell: bash
+        run: |
+          vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+          vercel build --prod --token="$VERCEL_TOKEN"
+          vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN" \
+            -e ZHIPU_API_KEY="$ZHIPU_API_KEY" \
+            -e ZHIPU_BASE_URL="$ZHIPU_BASE_URL" \
+            -e ZHIPU_MODEL="$ZHIPU_MODEL"

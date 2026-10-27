@@ -1,0 +1,10 @@
+node_modules
+.next
+.env
+.env.local
+*.pyc
+.git
+.gitignore
+README.md
+CLAUDE.md
+AGENTS.md
